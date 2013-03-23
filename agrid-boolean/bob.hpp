@@ -17,7 +17,10 @@ public:
 	cBORDER_FACET_RECORD();
 	cBORDER_FACET_RECORD(iCELL cellIndex, INT vertexIndex[4]);
 
-	INT VertexIndex(int v) {return m_vertexIndex[v];}
+	INT VertexIndex(int v) {
+		printf("Testing GIT HUB commit\n");
+		return m_vertexIndex[v];
+	}
 	INT CellIndex() {return m_cellIndex;}
 
 private:
