@@ -1,0 +1,11 @@
+Component name : io
+   Contains import of stl files into cSURFACE_MESH class. Contains export of a mesh to
+   OFF with color support for facets of a mesh.
+
+   Files
+   -----
+	stl.hpp,cpp
+	   stl import functionality.
+
+	off.hpp,cpp
+	   mesh export to OFF with color support for facets.

@@ -1,0 +1,14 @@
+Classes : 
+-------
+tTABLE : Implements the associative array functionality.
+
+defs.hpp :
+	 -- Contains definitions of basic data types.
+	 -- Contains misc. definitions 
+
+circulator.hpp :
+	 -- Contains definition of iterator to walk a circular
+	    linked list with no loops.
+
+utils_templ.hpp
+	 -- Contains definitions of utility template classes.

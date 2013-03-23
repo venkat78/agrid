@@ -1,0 +1,15 @@
+#!/bin/sh
+
+sed -e "s:/home/bu/workspace-prototype-final-push-7:$1:g" subdir.mk > subdir1.mk
+sed -e "s:/home/bu/workspace-prototype-final-push-7:$1:g" makefile > makefile.new
+
+mv subdir.mk subdir2.mk
+mv subdir1.mk subdir.mk
+mv makefile makefile.old
+mv makefile.new makefile
+
+make $2
+
+mv makefile.old makefile
+mv subdir2.mk subdir.mk
+

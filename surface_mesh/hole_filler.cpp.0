@@ -1,0 +1,212 @@
+/*
+ * hole_filler.cpp
+ *
+ *  Created on: Nov 28, 2011
+ */
+
+#include "hole_filler.hpp"
+
+cHOLE_VERTEX_RECORD::cHOLE_VERTEX_RECORD()
+{
+
+}
+
+REAL cHOLE_VERTEX_RECORD::ComputeAngleCosine(cSURFACE_MESH *m_mesh)
+{
+//  printf("pt0: "); m_in_half_edge->Tail()->Point().Print();
+//  printf("pt1: "); m_in_half_edge->Head()->Point().Print();
+//  printf("pt2: "); m_out_half_edge->Head()->Point().Print();
+  cVECTOR3 inVector = m_in_half_edge->Vector();
+  cVECTOR3 outVector = m_out_half_edge->Vector();
+  inVector = - inVector;
+  inVector = inVector.Normalize();
+//  printf("InV: "); inVector.Print();
+  outVector = outVector.Normalize();
+//  printf("outV: "); outVector.Print();
+  m_angle_cosine = inVector * outVector;
+  //m_is_deleted = false;
+//  printf("a_cos = %lf\n", m_angle_cosine);
+  return m_angle_cosine;
+}
+
+cHOLE_FILLER::cHOLE_FILLER(cSURFACE_MESH *mesh)
+{
+  m_mesh = mesh;
+  m_first_hole_facet_index = mesh->NumFacets();
+  m_first_hole_vertex_index = mesh->NumVertices();
+  m_cosine_0 = 0.5*sqrt(3.0); //acos(M_PI/6.0);
+  m_cosine_1 = 0.5; //acos(M_PI/3.0);
+  m_cosine_2 = -0.5; //acos(2.0*M_PI/3.0);
+  m_small_edge_length_squared = 1e-8; //0.01 * mesh bounding box size
+  m_comparable_edge_size_coeff = 0.75;
+  m_max_half_edge_squared_length = 0.0;
+  m_min_half_edge_squared_length = cLIMITS:: Max();
+}
+
+BOOL cHOLE_FILLER::Perform()
+{
+  PrepareVetexRecords();
+  while (m_vertex_records.size() > 0)
+    FillAtSmallestAngleVertex();
+  return true;
+}
+
+VOID cHOLE_FILLER::PrepareVetexRecords()
+{
+  cSURFACE_MESH::cHALF_EDGE* firstBorderHE = m_mesh->BorderHalfEdge();
+  printf("firstBorderHE: oppF%d: t%d; h%d\n",
+    firstBorderHE->Opp()->Facet()->Index(), firstBorderHE->Tail()->Index(), firstBorderHE->Head()->Index());
+  cSURFACE_MESH::cHALF_EDGE* currBorderHE = firstBorderHE;
+  FILE *vfile = fopen("vertices", "wb+");
+  INT vcount = 0;
+  fprintf(vfile, "%d\t:\tvertex %d\n", vcount++, firstBorderHE->Tail()->Index());
+
+  do {
+    REAL l = currBorderHE->SquaredLength();
+    if (l < m_small_edge_length_squared){ //remove this half-edge
+      cPOINT3 midPoint = (currBorderHE->Tail()->Point() + currBorderHE->Head()->Point())*.05;
+      m_mesh->MergeVertices(currBorderHE->Tail()->Index(), currBorderHE->Head()->Index(),
+          currBorderHE ->Tail()->Index(),  midPoint);
+    }
+    else {
+      if (l < m_min_half_edge_squared_length)
+        m_min_half_edge_squared_length = l;
+      if (l > m_max_half_edge_squared_length)
+        m_max_half_edge_squared_length = l;
+      currBorderHE = RegisterVertexRecord(currBorderHE);
+      printf("%d:\tcurrBorderHE: oppF%d: t%d; h%d\n",
+          vcount, currBorderHE->Opp()->Facet()->Index(), currBorderHE->Tail()->Index(), currBorderHE->Head()->Index());
+      fprintf(vfile, "%d\t:\tvertex %d\n", vcount++, currBorderHE->Tail()->Index());
+
+    }
+  } while (currBorderHE != firstBorderHE);
+
+  printf("size = %d; min_edge_length %lg; max_edge_length %lg\n",
+		  m_vertex_records.size(),
+		  sqrt(m_min_half_edge_squared_length), sqrt(m_max_half_edge_squared_length));
+  fclose(vfile);
+
+//temporary code for testing the pr_q
+/*
+  while (!m_vertex_records.empty()){
+	cHOLE_VERTEX_RECORD vr = m_vertex_records.top();
+    printf("v%d %d\t:cos %lf\n", vr.VertexIndex(), vr.AngleCosine());
+    m_vertex_records.pop();
+  }
+  */
+/*
+    for (std::list<cHOLE_VERTEX_RECORD>::iterator currVR = m_vertex_records.begin();
+        currVR != m_vertex_records.end(); currVR++ )
+    printf("v%d %d\t:cos %lf\n",
+        (*currVR).VertexIndex(),
+        (*currVR).AngleCosine());
+        */
+}
+
+INT cHOLE_FILLER::FillAtSmallestAngleVertex()
+{
+  cHOLE_VERTEX_RECORD SmallestAngleVertexRecord = m_vertex_records.top();
+  REAL angleCosine = SmallestAngleVertexRecord.AngleCosine();
+  printf("smallest: v %d; cos %lf; angle = %lf\n",
+      SmallestAngleVertexRecord.VertexIndex(), angleCosine, acos(angleCosine)*180.0/M_PI);
+  if (angleCosine <= m_cosine_0) //temp to test
+    return FillAtVertexZeroTriangles(SmallestAngleVertexRecord);
+  else if (angleCosine >= m_cosine_1)
+    return FillAtVertexOneTriangle(SmallestAngleVertexRecord);
+  else if (angleCosine >= m_cosine_2)
+    return FillAtVertexTwoTriangles(SmallestAngleVertexRecord);
+  else
+    return FillAtVertexThreeTriangles(SmallestAngleVertexRecord);
+}
+
+/*
+std::list<cHOLE_VERTEX_RECORD>::iterator cHOLE_FILLER::FindSmallestAngleVertexRecord()
+{
+  REAL smallestAngleCosine = -2.0;
+  iVERTEX smallestAngleVertexIndex = INVALID_IVERTEX;
+
+  while (!m_vertex_records.empty()){
+//  for (std::list<cHOLE_VERTEX_RECORD>::iterator currVR = m_vertex_records.begin();
+//      currVR != m_vertex_records.end(); currVR++ ){
+    const cHOLE_VERTEX_RECORD currVR =   m_vertex_records.top();
+    REAL currAngleCosine = currVR.AngleCosine();
+    iVERTEX currVertexIndex = currVR.VertexIndex();
+//    printf("curr: v %d c %lf; smallest: v %d c %lf\n",
+//        currVertexIndex, currAngleCosine,
+//        smallestAngleVertexIndex, smallestAngleCosine);
+    if ((fabs(currAngleCosine - smallestAngleCosine) <= cLIMITS::Epsilon() &&
+      currVertexIndex < smallestAngleVertexIndex) ||
+      (currAngleCosine > smallestAngleCosine)){
+        smallestAngleVertexIndex = currVertexIndex;
+        smallestAngleCosine = currAngleCosine;
+        smallestAngleVR = currVR;
+    }
+  }
+  return smallestAngleVR;
+}
+*/
+
+INT cHOLE_FILLER::FillAtVertexZeroTriangles(cHOLE_VERTEX_RECORD &vertexRecord)
+{
+//  cHOLE_VERTEX_RECORD vertexRecord = SmallestAngleVertexRecord.operator*();
+  cSURFACE_MESH::cHALF_EDGE *inHE = vertexRecord.IncomingHE();
+  cSURFACE_MESH::cHALF_EDGE *outHE = vertexRecord.OutgoingHE();
+  REAL l1 = inHE->SquaredLength();
+  REAL l2 = outHE->SquaredLength();
+  if (l1 < l2){
+    REAL t = sqrt(l1/l2);
+ //   cPOINT3 newPoint = outHE->ParamPoint(t);
+ //   m_mesh->MergeVertices(inHE->Tail()->Index(), outHE->Head()->Index(),
+  //       inHE->Tail()->Index(),  newPoint);
+//    if ()
+
+  }
+  printf("l1 = %lf; l2 = %lf\n", l1, l2);
+  if (l1 >= l2*m_comparable_edge_size_coeff && l2 >= l1*m_comparable_edge_size_coeff){
+    //merge the two vertices
+    cPOINT3 midPoint = (inHE->Tail()->Point() + outHE->Head()->Point())*.05;
+    m_mesh->MergeVertices(inHE->Tail()->Index(), outHE->Head()->Index(),
+        inHE->Tail()->Index(),  midPoint);
+    m_vertex_records.pop();
+  }
+  else if (l1 < l2){
+
+  }
+  else {
+
+  }
+  return 0;
+}
+
+INT cHOLE_FILLER::FillAtVertexOneTriangle(cHOLE_VERTEX_RECORD &vertexRecord)
+{
+  return 1;
+}
+
+INT cHOLE_FILLER::FillAtVertexTwoTriangles(cHOLE_VERTEX_RECORD &vertexRecord)
+{
+  return 2;
+}
+
+INT cHOLE_FILLER::FillAtVertexThreeTriangles(cHOLE_VERTEX_RECORD &vertexRecord)
+{
+  return 3;
+}
+
+//creates border vertex records
+cSURFACE_MESH::cHALF_EDGE*
+cHOLE_FILLER::RegisterVertexRecord(cSURFACE_MESH::cHALF_EDGE* currBorderHE)
+{
+  cSURFACE_MESH::cVERTEX* nextVertex = currBorderHE->Head();
+  cSURFACE_MESH::cHALF_EDGE*  nextBorderHE = NULL;
+  cVECTOR3 currHEVector = currBorderHE->Vector();
+  currHEVector = currHEVector.Normalize();
+  nextVertex->OutgoingBorderHE(currHEVector, &nextBorderHE);
+  cHOLE_VERTEX_RECORD vertexRecord;
+  vertexRecord.VertexIndex(nextVertex);
+  vertexRecord.IncomingHE(currBorderHE);
+  vertexRecord.OutgoingHE(nextBorderHE);
+  vertexRecord.ComputeAngleCosine(m_mesh);
+  m_vertex_records.push(vertexRecord);
+  return nextBorderHE;
+}

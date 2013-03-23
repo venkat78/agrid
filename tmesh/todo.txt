@@ -1,0 +1,6 @@
+1. Fix MergeEdgesAtVertex(). Some bug that needs to be investigated.
+2. Non-manifold bits at MergeEdgesAtVertex.
+3. Add ObjectFactory template parameter to Mesh.
+4. If possible add a Container type to ObjectFactory template.
+5 Move MergeVertices to topo operators.
+6. Rename variables in MateHalfEdges(). 

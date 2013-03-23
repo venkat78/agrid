@@ -1,0 +1,20 @@
+Component name : agrid-mesh
+   Contains different instantiations of tMESH used to generate cut-cells. The various 
+   incarinations are 
+	** cCUT_CELL : Represents cut-cells generated from gray-cells.
+	** cCUT_CELL_CLAY : Mesh which is edited to create cut-cells from a gray-cell. 
+	** cVOLUMETRIC_GRID : Represents a volumetric-grid. Extension to a face, contains
+			      incident cells. A cell is added to the representation, which
+			      is a collection of incident faces.
+
+   Files
+   -----
+	cut_cell.hpp,cpp
+	   ** Contains definition of cCUT_CELL.
+
+	cut_cell_clay.hpp,cpp
+	   ** Contains definition of mesh edited to get cut-cells.
+
+	volumetric_grid.hpp,cpp
+	   ** Definition of a volumetric grid.
+	

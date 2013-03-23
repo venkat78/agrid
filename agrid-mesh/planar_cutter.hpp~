@@ -1,0 +1,54 @@
+/*
+ * planar_cutter.hpp
+ *
+ *  Created on: Jan 7, 2011
+ */
+
+//this class is used for cutting a mesh by a plane. If the initial point of the cut is given,
+//the minimal loop starting and terminating at this point, is created.
+#ifndef _MESH_PLANAR_CUTTER_HPP_
+#define _MESH_PLANAR_CUTTER_HPP_
+
+#include "defs.hpp"
+#include "cut_cell.hpp"
+
+  class cPLANAR_CUTTER {
+  public: //constructors
+    cPLANAR_CUTTER();
+
+    cPLANAR_CUTTER(cSURFACE_MESH *mesh, cSURFACE_MESH::cVERTEX *startingVertex,
+        cPLANE3 &cuttingPlane);
+    cPLANAR_CUTTER(cSURFACE_MESH *mesh, cSURFACE_MESH::cHALF_EDGE *startingHalfEdge,
+        cPLANE3 &cuttingPlane);
+    cPLANAR_CUTTER(cSURFACE_MESH *mesh, cPLANE3 &cuttingPlane);
+    cSURFACE_MESH *Mesh() {return m_mesh;}
+
+  public: //methods
+
+    cSURFACE_MESH *SplitMesh();
+    VOID Debug(BOOL flag) {m_debug = flag;}
+
+  private: //methods
+    BOOL Debug() {return m_debug;}
+    cSURFACE_MESH::cHALF_EDGE *IntersectingHalfEdge();
+    cSURFACE_MESH::cHALF_EDGE *SplitFacet(cSURFACE_MESH::cHALF_EDGE *intersectingHE);
+    cSURFACE_MESH::cHALF_EDGE* FacetHEPlaneIntersection(cSURFACE_MESH::cFACET *facet,
+        REAL *p_distFacetPlane, cPOINT3 *p_intersectionPoint,
+        BOOL *p_closestIntersectionIsHEHead);
+    VOID FormPlaneFacets();
+
+  private: //fields
+    cSURFACE_MESH *m_mesh;
+    cPLANE3 m_cuttingPlane;
+    BOOL m_debug;
+    cSURFACE_MESH::cVERTEX *m_startingVertex;
+    cSURFACE_MESH::cVERTEX *m_currentEndVertex;
+    cPOINT3 m_intersectionPoint;
+    BOOL m_closestIntersectionIsHEHead;
+    BOOL m_edgeOnFacet;
+    cSURFACE_MESH::cHALF_EDGE *m_lastHE;  //current last HE in loop; it is already in the list
+    std::list<cSURFACE_MESH::cHALF_EDGE*> m_halfEdges; //half edges forming the loop
+  };
+
+
+#endif /* _MESH_PLANAR_CUTTER_HPP_ */

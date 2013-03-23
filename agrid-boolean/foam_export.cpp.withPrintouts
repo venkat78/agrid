@@ -1,0 +1,702 @@
+#include "foam_export.hpp"
+
+namespace agrid_boolean {
+
+  typedef  char BOUNDARY_NAME[24];
+  BOUNDARY_NAME boundaryName[7] =
+		  {"Inlet", "Outlet", "Sidewall1", "Sidewall2", "Floor", "Ceiling", "InputGeometry"};
+  BOOL foam_export_print_debug_files = true;
+  INT face_debug_count = 0;
+  struct sQUAD {INT index; cPOINT3 vpt[4];};
+
+  std::vector<sQUAD> xFaces;
+  std::vector<sQUAD> yFaces;
+  std::vector<sQUAD> zFaces;
+
+  BOOL PrintDebugFiles() { return foam_export_print_debug_files;}
+  VOID PrintDebugFiles(BOOL doPrint) {foam_export_print_debug_files = doPrint;}
+
+  struct sFOAM_FILE_POINTERS {
+    FILE *ownerFile, *neighbourFile,
+      *pointFile, *boundaryFile, *faceFile;
+  };
+
+  VOID AddFacetBox(cVOLUMETRIC_GRID::cFACET* facet, cBOX3 &box)
+  {
+	cVOLUMETRIC_GRID::cFACET::vertex_circulator currVertex = facet->VerticesBegin();
+	cVOLUMETRIC_GRID::cFACET::vertex_circulator lastVertex = facet->VerticesEnd();
+
+	for( ; currVertex != lastVertex ; currVertex++ ) {
+	  cPOINT3 vertexPoint = currVertex->Point();
+	  box += vertexPoint;
+	}
+  }
+
+
+  VOID AddFacetBox(cVOLUMETRIC_GRID &grid, iFACET faceIndex, cBOX3 &box)
+  {
+	cVOLUMETRIC_GRID::cFACET* face = grid.Facet(faceIndex);
+	AddFacetBox(face, box);
+  }
+
+  VOID RegisterQuad(INT i, cPOINT3 &vp0, cPOINT3 &vp1, cPOINT3 &vp2, cPOINT3 &vp3)
+  {
+	BOOL isCoord[3] = {true, true, true};
+	sQUAD quad;
+	quad.index = i;
+	quad.vpt[0] = vp0;
+	quad.vpt[1] = vp1;
+	quad.vpt[2] = vp2;
+	quad.vpt[3] = vp3;
+	DO_COORDS(c){
+	  if (isCoord[c]){
+		for (INT i=1; isCoord[c] && i<4; i++){
+		  if (fabs(quad.vpt[i][c] - quad.vpt[0][c]) >= cLIMITS::Tolerance())
+			isCoord[c] = false;
+		}
+	  }
+	}
+	eCOORD coord = GEOM_COORD_NONE;
+	DO_COORDS(c){
+	  if (isCoord[c])
+		coord = c;
+	}
+
+	if (coord == GEOM_X)
+	  xFaces.push_back(quad);
+	else if (coord == GEOM_Y)
+	  yFaces.push_back(quad);
+	else if (coord == GEOM_Z)
+	  zFaces.push_back(quad);
+  }
+
+  VOID PrintQuads( std::vector<sQUAD> quads, eCOORD coord, FILE *stream = stdout)
+  {
+	fprintf(stream, "NumQuads = %d\n", (INT)quads.size());
+	INT count=0;
+	for (INT u = 0; u < 8; u++){
+	  for (INT i=0; i<(INT)quads.size(); i++){
+		sQUAD quad = quads[i];
+		if (fabs(quad.vpt[0][coord] - (REAL)u) < 1e-8){
+		  fprintf(stream,
+				  "%d:\t%d:\t(%d %d %d); (%d %d %d); (%d %d %d); (%d %d %d);\n",
+				  count++, quad.index,
+				  (INT)(quad.vpt[0][0]+1e-8), (INT)(quad.vpt[0][1]+1e-8), (INT)(quad.vpt[0][2]+1e-8),
+				  (INT)(quad.vpt[1][0]+1e-8), (INT)(quad.vpt[1][1]+1e-8), (INT)(quad.vpt[1][2]+1e-8),
+				  (INT)(quad.vpt[2][0]+1e-8), (INT)(quad.vpt[2][1]+1e-8), (INT)(quad.vpt[2][2]+1e-8),
+				  (INT)(quad.vpt[3][0]+1e-8), (INT)(quad.vpt[3][1]+1e-8), (INT)(quad.vpt[3][2]+1e-8));
+		}
+	  }
+	}
+  }
+
+  FILE *OpenFoamNeighbourFile(const std::string &filePath,
+			     cVOLUMETRIC_GRID &grid)
+  {
+    std::string fileName = filePath; fileName += "/constant/polyMesh/neighbour";
+
+    FILE *neighbourFile = fopen(fileName.c_str(), "wb+");
+
+    fprintf(neighbourFile, "/*--------------------------------*- C++ -*----------------------------------*\\ \n");
+    fprintf(neighbourFile, "| =========                 |                                                           |\n");
+    fprintf(neighbourFile, "| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox    |\n");
+    fprintf(neighbourFile, "|  \\    /   O peration     | Version:  1.5.x                                            |\n");
+    fprintf(neighbourFile, "|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |\n");
+    fprintf(neighbourFile, "|    \\/     M anipulation  |                                                                  |\n");
+    fprintf(neighbourFile, " \\*-----------------------------------------------------------------------------*/ \n");
+    fprintf(neighbourFile, "FoamFile\n");
+    fprintf(neighbourFile, "{\n");
+    fprintf(neighbourFile, "version     2.0;\n");
+    fprintf(neighbourFile, "format      ascii;\n");
+    fprintf(neighbourFile, "class      labelList;\n");
+    fprintf(neighbourFile, "note \"nPoints: %d nCells : %d nFaces : %d nInternalFaces : %d \" \n", grid.NumVertices(), grid.NumCells(),
+            grid.NumFaces(), grid.NumInteriorFaces());
+    fprintf(neighbourFile, "location    \"constant/polyMesh\";\n");
+    fprintf(neighbourFile, "object     neighbor;\n");
+    fprintf(neighbourFile,"}\n");
+    fprintf(neighbourFile, "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n");
+
+    return neighbourFile;
+
+  }
+
+  FILE* OpenFoamOwnerFile(const std::string &filePath,
+			  cVOLUMETRIC_GRID &grid)
+  {
+    std::string fileName = filePath; fileName += "/constant/polyMesh/owner";
+
+    FILE *ownerFile = fopen(fileName.c_str(), "wb+");
+    fprintf(ownerFile, "/*--------------------------------*- C++ -*----------------------------------*\\ \n");
+    fprintf(ownerFile, "| =========                 |                                                           |\n");
+    fprintf(ownerFile, "| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox    |\n");
+    fprintf(ownerFile, "|  \\    /   O peration     | Version:  1.5.x                                            |\n");
+    fprintf(ownerFile, "|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |\n");
+    fprintf(ownerFile, "|    \\/     M anipulation  |                                                                  |\n");
+    fprintf(ownerFile, " \\*-----------------------------------------------------------------------------*/ \n");
+    fprintf(ownerFile, "FoamFile\n");
+    fprintf(ownerFile, "{\n");
+    fprintf(ownerFile, "version     2.0;\n");
+    fprintf(ownerFile, "format      ascii;\n");
+    fprintf(ownerFile, "class     labelList;\n");
+    fprintf(ownerFile, "note \"nPoints: %d nCells : %d nFaces : %d nInternalFaces : %d \" \n", grid.NumVertices(), grid.NumCells(),
+	    grid.NumFaces(), grid.NumInteriorFaces());
+    fprintf(ownerFile, "location    \"constant/polyMesh\";\n");
+    fprintf(ownerFile, "object      owner;\n");
+    fprintf(ownerFile,"}\n");
+    fprintf(ownerFile, "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n");
+    return ownerFile;
+  }
+
+  FILE* OpenFoamBoundaryFile(const std::string &filePath,
+			     cVOLUMETRIC_GRID &grid)
+  {
+    std::string fileName = filePath; fileName += "/constant/polyMesh/boundary";
+
+    FILE *boundaryFile = fopen(fileName.c_str(), "wb+");
+    fprintf(boundaryFile, "/*--------------------------------*- C++ -*----------------------------------*\\ \n");
+    fprintf(boundaryFile, "| =========                 |                                                           |\n");
+    fprintf(boundaryFile, "| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox    |\n");
+    fprintf(boundaryFile, "|  \\    /   O peration     | Version:  1.5.x                                            |\n");
+    fprintf(boundaryFile, "|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |\n");
+    fprintf(boundaryFile, "|    \\/     M anipulation  |                                                                  |\n");
+    fprintf(boundaryFile, " \\*-----------------------------------------------------------------------------*/ \n");
+    fprintf(boundaryFile, "FoamFile\n");
+    fprintf(boundaryFile, "{\n");
+    fprintf(boundaryFile, "version     2.0;\n");
+    fprintf(boundaryFile, "format      ascii;\n");
+    fprintf(boundaryFile, "class     polyBoundaryMesh;\n");
+    fprintf(boundaryFile, "location    \"constant/polyMesh\";\n");
+    fprintf(boundaryFile, "object      boundary;\n");
+    fprintf(boundaryFile,"}\n");
+    fprintf(boundaryFile, "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n");
+
+    return boundaryFile;
+  }
+
+  FILE* OpenFoamFaceFile(const std::string &filePath)
+   {
+    std::string fileName = filePath; fileName += "/constant/polyMesh/faces";
+
+    FILE *faceFile = fopen(fileName.c_str(), "wb+");
+    fprintf(faceFile, "/*--------------------------------*- C++ -*----------------------------------*\\ \n");
+    fprintf(faceFile, "| =========                 |                                                           |\n");
+    fprintf(faceFile, "| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox    |\n");
+    fprintf(faceFile, "|  \\    /   O peration     | Version:  1.5.x                                            |\n");
+    fprintf(faceFile, "|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |\n");
+    fprintf(faceFile, "|    \\/     M anipulation  |                                                                  |\n");
+    fprintf(faceFile, " \\*-----------------------------------------------------------------------------*/ \n");
+    fprintf(faceFile, "FoamFile\n");
+    fprintf(faceFile, "{\n");
+    fprintf(faceFile, "version     2.0;\n");
+    fprintf(faceFile, "format      ascii;\n");
+    fprintf(faceFile, "class     faceList;\n");
+    fprintf(faceFile, "location    \"constant/polyMesh\";\n");
+    fprintf(faceFile, "object      faces;\n");
+    fprintf(faceFile,"}\n");
+    fprintf(faceFile, "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n");
+
+    return faceFile;
+  }
+
+  FILE* OpenFoamPointFile(const std::string &filePath)
+  {
+    std::string fileName = filePath; fileName += "/constant/polyMesh/points";
+
+    FILE *file = fopen(fileName.c_str(), "wb+");
+    fprintf(file, "/*--------------------------------*- C++ -*----------------------------------*\\ \n");
+    fprintf(file, "| =========                 |                                                           |\n");
+    fprintf(file, "| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox    |\n");
+    fprintf(file, "|  \\    /   O peration     | Version:  1.5.x                                            |\n");
+    fprintf(file, "|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |\n");
+    fprintf(file, "|    \\/     M anipulation  |                                                                  |\n");
+    fprintf(file, " \\*-----------------------------------------------------------------------------*/ \n");
+    fprintf(file, "FoamFile\n");
+    fprintf(file, "{\n");
+    fprintf(file, "version     2.0;\n");
+    fprintf(file, "format      ascii;\n");
+    fprintf(file, "class      vectorField;\n");
+    fprintf(file, "location    \"constant/polyMesh\";\n");
+    fprintf(file, "object      points;\n");
+    fprintf(file,"}\n");
+    fprintf(file, "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n");
+
+    return file;
+  }
+
+  VOID OpenFoamFiles(sFOAM_FILE_POINTERS &ptr,
+		     const std::string &filePath,
+		     cVOLUMETRIC_GRID &grid) {
+    ptr.pointFile = OpenFoamPointFile(filePath);
+    ptr.faceFile = OpenFoamFaceFile(filePath);
+    ptr.ownerFile = OpenFoamOwnerFile(filePath, grid);
+    ptr.neighbourFile = OpenFoamNeighbourFile(filePath, grid);
+    ptr.boundaryFile = OpenFoamBoundaryFile(filePath, grid);
+  }
+
+  VOID CloseFoamFiles(sFOAM_FILE_POINTERS &ptr)
+  {
+    fclose(ptr.pointFile);
+    fclose(ptr.faceFile);
+    fclose(ptr.ownerFile);
+    fclose(ptr.neighbourFile);
+    fclose(ptr.boundaryFile);
+  }
+
+  VOID ExportGridVerticesToFoam(FILE *file,
+				cVOLUMETRIC_GRID &grid,
+				std::vector<INT> &validVtxMap, cBOB *bob,
+				std::vector<cPOINT3> &vertexPoints)
+  {
+    cVOLUMETRIC_GRID::vertex_iterator currVertex = grid.VerticesBegin();
+    cVOLUMETRIC_GRID::vertex_iterator lastVertex = grid.VerticesEnd();
+
+    INT numVertices = 0;
+    FILE *vertices_debug_file = PrintDebugFiles() ? fopen("vertices.debug", "wb+") : NULL;
+    fprintf(file,"%d\n", grid.NumVertices() + bob->NumVertices());
+    fprintf(file, "(\n");
+    if (PrintDebugFiles())
+      fprintf(vertices_debug_file, "NumVertices %d\n", grid.NumVertices());
+    bob->PrintGridVertexMap();
+   for( ; currVertex != lastVertex ; currVertex++ ) {
+      cPOINT3 point = currVertex->Point();
+//      printf("%d:\tV %d\t: %lf %lf %lf\n",
+//    		  numVertices, currVertex->Index(), point[0], point[1], point[2]);
+      bob->RegisterVertexIfOnGrid(point, numVertices);
+      validVtxMap[currVertex->Index()] = numVertices++;
+      fprintf(file, "(%lg %lg %lg)\n", point[0], point[1], point[2]);
+      if (PrintDebugFiles())
+        fprintf(vertices_debug_file, "V%d\t{%d, %d, %d}\n",
+    		  currVertex->Index(), (INT)(point[0]+1e-8), (INT)(point[1]+1e-8), (INT)(point[2]+1e-8));
+      vertexPoints.push_back(point);
+    }
+   bob->PrintGridVertexMap();
+
+   //print out vertices from the external grid
+   for (INT i = 0; i < bob->VertexMapSize(); i++){
+	 if (bob->RegisterExternalVertex(i, numVertices)){
+	   cPOINT3 point = bob->VertexPoint(i);
+	   fprintf(file, "(%lg %lg %lg)\n", point[0], point[1], point[2]);
+	   if (PrintDebugFiles())
+		   fprintf(vertices_debug_file, "V%d\t{%lg, %lg, %lg}\n",
+				   numVertices, point[0], point[1], point[2]);
+	   vertexPoints.push_back(point);
+	   numVertices++;
+	 }
+   }
+   bob->PrintGridVertexMap();
+    fprintf(file, ")\n");
+    if (PrintDebugFiles())
+      fclose(vertices_debug_file);
+  }
+
+  VOID ExportFace(sFOAM_FILE_POINTERS &files, cVOLUMETRIC_GRID &grid,
+		  iFACE faceIndex, std::vector<INT> &validVtxMap,
+		  std::vector<cPOINT3> &vertexPoints,
+		  iCELL neighborCellIndex = INVALID_ICELL)
+  {
+	if (PrintDebugFiles()){
+	  FILE *faces_debug_file = fopen("faces.debug", "ab+");
+	  fprintf(faces_debug_file, "f%d:\t", face_debug_count++);
+	  fclose(faces_debug_file);
+	}
+    cVOLUMETRIC_GRID::cFACET* face = grid.Facet(faceIndex);
+
+    INT numVertices = face->NumVertices();
+
+    fprintf(files.faceFile,"\n%d(", numVertices);
+
+    cVOLUMETRIC_GRID::cFACET::vertex_circulator currVertex = face->VerticesBegin();
+    cVOLUMETRIC_GRID::cFACET::vertex_circulator lastVertex = face->VerticesEnd();
+    cPOINT3 vpt[4];
+    INT v=0;
+
+    for( ; currVertex != lastVertex ; currVertex++ ) {
+      INT vertexIndex = validVtxMap[currVertex->Index()];
+      ASSERT(vertexIndex >= 0);
+	  fprintf(files.faceFile, "%d ", vertexIndex);
+      if (PrintDebugFiles()){
+    	cPOINT3 vertexPoint = vertexPoints[vertexIndex];
+    	FILE *faces_debug_file = fopen("faces.debug", "ab+");
+    	fprintf(faces_debug_file, "%d{%d %d %d}; ",
+        		vertexIndex, (INT)vertexPoint[0], (INT)vertexPoint[1], (INT)vertexPoint[2]);
+    	fclose(faces_debug_file);
+    	vpt[v++] = vertexPoint;
+      }
+    }
+
+    fprintf(files.faceFile, ")\n");
+    if (PrintDebugFiles()){
+      FILE *faces_debug_file = fopen("faces.debug", "ab+");
+      fprintf(faces_debug_file, "\n");
+      fclose(faces_debug_file);
+      RegisterQuad(face_debug_count, vpt[0], vpt[1], vpt[2], vpt[3]);
+    }
+
+    fprintf(files.ownerFile, "%d\n", face->LeftCellIndex());
+
+//    if(face->RightCellIndex() != INVALID_ICELL)
+    if(face->RightCellIndex() != INVALID_ICELL)
+    	ASSERT(face->RightCellIndex() == neighborCellIndex);
+    if (neighborCellIndex != INVALID_ICELL)
+      fprintf(files.neighbourFile, "%d\n", neighborCellIndex);
+  }
+
+
+  //facets loacted on the bob graygrid box are not boundary facets
+  BOOL FacetIsOnInterface(cVOLUMETRIC_GRID &grid,
+				  iFACET facetIndex, cBOB *bob)
+  {
+	cBOX3 &grayGridBox = bob->GrayGridVol();
+    cVOLUMETRIC_GRID::cFACET* facet = grid.Facet(facetIndex);
+
+    cVOLUMETRIC_GRID::cFACET::vertex_circulator currVertex = facet->VerticesBegin();
+    cVOLUMETRIC_GRID::cFACET::vertex_circulator lastVertex = facet->VerticesEnd();
+    BOOL vertexOnBoxBoundary[3][2] = {{true, true}, {true, true}, {true, true}};
+
+    for( ; currVertex != lastVertex ; currVertex++ ) {
+      cPOINT3 vertexPoint = currVertex->Point();
+      if (!grayGridBox.PointIsOnBoundary(vertexPoint, vertexOnBoxBoundary))
+    	return false;
+    }
+	return true;
+  }
+
+  //return index of a white cell adjacent to the inoput facet. The inout facet lies on the
+  //gray grid boundary. It is also assumed that this facet is rectangular which it should be.
+  iCELL InterfaceFacetCellIndex(cVOLUMETRIC_GRID &grid,
+		  iFACET facetIndex, cBOB *bob)
+  {
+	//1. find facet vertex with the smallest coordinates.
+	cVOLUMETRIC_GRID::cFACET* facet = grid.Facet(facetIndex);
+
+	cVOLUMETRIC_GRID::cFACET::vertex_circulator currVertex = facet->VerticesBegin();
+	cVOLUMETRIC_GRID::cFACET::vertex_circulator lastVertex = facet->VerticesEnd();
+	BOOL facetCoordPlane[3] = {true, true, true};
+
+	//use first vertex differently
+	cPOINT3 firstPoint = currVertex->Point();
+	currVertex++;
+	cPOINT3 minCoordVertexPoint = firstPoint;
+
+	for( ; currVertex != lastVertex ; currVertex++ ) {
+	  cPOINT3 vertexPoint = currVertex->Point();
+	  DO_COORDS(coord){
+		if (vertexPoint[coord] < minCoordVertexPoint[coord])
+			minCoordVertexPoint[coord] = vertexPoint[coord];
+		if (fabs(vertexPoint[coord] - firstPoint[coord]) > cLIMITS::Tolerance())
+		  facetCoordPlane[coord] = false;
+	  }
+	}
+
+	eCOORD facetCoord = GEOM_COORD_NONE;
+	DO_COORDS(coord){
+	  if (facetCoordPlane[coord])
+		facetCoord = coord;
+	}
+	iCELL cellIndex = bob->VertexPointCellIndex(minCoordVertexPoint, facetCoord);
+	bob->RegisterInterfaceFacet(minCoordVertexPoint, facetCoord,
+			facetIndex, cellIndex);
+	return cellIndex;
+  }
+
+  //check pairs which don't have a cell, and if a facet lies on the graygrid boundary,
+  //replace it with the corresponding white cell, and if not, remove
+  VOID ComputeNeighborsOnInterface(std::vector<sFACE_CELL_PAIR> &neighbors,
+		  cVOLUMETRIC_GRID &grid, cBOB *bob, INT cellIndex)
+  {
+	std::vector<sFACE_CELL_PAIR>::iterator currPair = neighbors.begin();
+	std::vector<sFACE_CELL_PAIR>::iterator lastPair = neighbors.end();
+
+	for( ; currPair != lastPair ; currPair++ ) {
+	  if(currPair->cellIndex < 0) {
+		if (FacetIsOnInterface(grid, currPair->faceIndex, bob)){
+		  currPair->cellIndex = InterfaceFacetCellIndex(grid, currPair->faceIndex, bob);
+		  currPair->faceIndex = -currPair->faceIndex + INVALID_IFACET - 1; //as a sign of non-interior face
+//		  printf("f %d; c %d; n %d\n", currPair->faceIndex, cellIndex, currPair->cellIndex);
+		}
+		//the boundary facet pair is not deleted, but it should be ignored down the road
+	  }
+	}
+  }
+
+  INT ExportCell(sFOAM_FILE_POINTERS &files, cVOLUMETRIC_GRID &grid,
+		  cBOB *bob, INT cellIndex,
+		  std::vector<BOOL> &facesExported,
+		  std::vector<INT> &validVtxMap,
+		  std::vector<cPOINT3> &vertexPoints)
+  {
+    INT numFacesWritten = 0;
+    std::vector<sFACE_CELL_PAIR> neighbors;
+    FILE *cell_debug_file = PrintDebugFiles() ?  fopen("cells.debug", "ab+") : NULL;
+    if (PrintDebugFiles())
+      fprintf(cell_debug_file, "c%d:\t", cellIndex);
+    BOOL borderNeighbors = grid.Cell(cellIndex)->Neighbours(neighbors);
+/*    cBOX3 cellBox;
+    for (INT k = 0; k<(INT)neighbors.size(); k++)
+   	  AddFacetBox(grid, neighbors[k].faceIndex, cellBox);
+     printf("cellBox cellIndex %d: ", cellIndex);
+     cellBox.Print();
+*/
+    if (borderNeighbors){
+    	//some of the neighbors may be on the interface and need to be computed
+//        printf("neighbors before recomputation:\n");
+//      for (INT k = 0; k<(INT)neighbors.size(); k++)
+//        printf("%d:\tfacet %d; cell %d;\n", k, neighbors[k].faceIndex, neighbors[k].cellIndex);
+      ComputeNeighborsOnInterface(neighbors, grid, bob, cellIndex);
+    }
+    sFACE_CELL_PAIR_CMP faceCellPairCmp;
+
+    printf("neighbors before sorting:\n");
+    for (INT k = 0; k<(INT)neighbors.size(); k++)
+      printf("%d:\tfacet %d; cell %d;\n", k, neighbors[k].faceIndex, neighbors[k].cellIndex);
+
+    std::sort(neighbors.begin(), neighbors.end(), faceCellPairCmp);
+
+    printf("neighbors after sorting:\n");
+    for (INT k = 0; k<(INT)neighbors.size(); k++)
+      printf("%d:\tfacet %d; cell %d;\n", k, neighbors[k].faceIndex, neighbors[k].cellIndex);
+
+    std::vector<sFACE_CELL_PAIR>::iterator currPair = neighbors.begin();
+    std::vector<sFACE_CELL_PAIR>::iterator lastPair = neighbors.end();
+
+    for( ; currPair != lastPair ; currPair++ ) {
+      if (PrintDebugFiles())
+    	fprintf(cell_debug_file, "%d; ", currPair->faceIndex);
+      if(currPair->cellIndex > cellIndex) {
+    	BOOL FaceIsNotInterior = false;
+    	if (currPair->faceIndex < INVALID_IFACET){
+    		currPair->faceIndex = -currPair->faceIndex + INVALID_IFACET - 1;
+    		FaceIsNotInterior = true;
+    	}
+        cVOLUMETRIC_GRID::cFACET* face = grid.Facet(currPair->faceIndex);
+        if((FaceIsNotInterior || face->IsInterior()) && !facesExported[currPair->faceIndex]) {
+          numFacesWritten++;
+          ExportFace(files,grid, currPair->faceIndex, validVtxMap,
+        		  vertexPoints, currPair->cellIndex);
+          facesExported[currPair->faceIndex] = true;
+        }
+      }
+    }
+    if (PrintDebugFiles()){
+      fprintf(cell_debug_file, "\n");
+      fclose(cell_debug_file);
+    }
+
+    return numFacesWritten;
+  }
+
+  INT ExportWhiteCell(sFOAM_FILE_POINTERS &files, cWHITE_CELL &whiteCell,
+		  BORDER_FACETS_TABLE *borderWhiteFacets,
+		     std::vector<cPOINT3> &vertexPoints)
+  {
+//	printf("white cell index %d\n", whiteCell.CellIndex());
+	INT numFacesWritten = 0;
+	for (INT f = 0; f < 6; f++){
+	  if (whiteCell.AdjacentCellIndex(f) > whiteCell.CellIndex()){
+		INT vertexIndex[4];
+		cPOINT3 vertexPoint[4];
+		for (INT v=0; v<4; v++){
+		  vertexIndex[v] = whiteCell.VertexIndex(f, v);
+		  ASSERT(vertexIndex[v] >= 0);
+		  vertexPoint[v] = vertexPoints[vertexIndex[v]];
+		}
+		if (PrintDebugFiles()){
+		  FILE *faces_debug_file = fopen("faces.debug", "ab+");
+		  fprintf(faces_debug_file,
+					"f%d:\t%d{%d %d %d}; %d{%d %d %d}; %d{%d %d %d}; %d{%d %d %d}; \n",
+					face_debug_count++,
+	        		vertexIndex[0], (INT)(vertexPoint[0][0]+1e-8), (INT)(vertexPoint[0][1]+1e-8), (INT)(vertexPoint[0][2]+1e-8),
+	        		vertexIndex[1], (INT)(vertexPoint[1][0]+1e-8), (INT)(vertexPoint[1][1]+1e-8), (INT)(vertexPoint[1][2]+1e-8),
+	        		vertexIndex[2], (INT)(vertexPoint[2][0]+1e-8), (INT)(vertexPoint[2][1]+1e-8), (INT)(vertexPoint[2][2]+1e-8),
+	        		vertexIndex[3], (INT)(vertexPoint[3][0]+1e-8), (INT)(vertexPoint[3][1]+1e-8), (INT)(vertexPoint[3][2]+1e-8));
+		  fclose(faces_debug_file);
+	      RegisterQuad(face_debug_count, vertexPoint[0], vertexPoint[1], vertexPoint[2], vertexPoint[3]);
+		}
+
+		fprintf(files.faceFile,"\n4(%d %d %d %d)\n",
+					whiteCell.VertexIndex(f, 0),
+					whiteCell.VertexIndex(f, 1),
+					whiteCell.VertexIndex(f, 2),
+					whiteCell.VertexIndex(f, 3));
+		fprintf(files.ownerFile, "%d\n", whiteCell.CellIndex());
+		fprintf(files.neighbourFile, "%d\n", whiteCell.AdjacentCellIndex(f));
+		numFacesWritten++;
+	  }
+	  else if(whiteCell.AdjacentCellIndex(f) == -1){
+		iCELL cellIndex = whiteCell.CellIndex();
+		INT *vertices = whiteCell.FacetVertices(f);
+		cBORDER_FACET_RECORD borderFacet(cellIndex, vertices);
+		borderWhiteFacets[f].push_back(borderFacet);
+	  }
+	}
+	return numFacesWritten;
+  }
+
+
+  VOID ExportBorderWhiteFacet(sFOAM_FILE_POINTERS &files,
+		  cBORDER_FACET_RECORD &borderFacet,
+		     std::vector<cPOINT3> &vertexPoints )
+  {
+	if (PrintDebugFiles()){
+	  cPOINT3 vertexPoint[4];
+	  for (INT v=0; v<4; v++){
+		vertexPoint[v] = vertexPoints[borderFacet.VertexIndex(v)];
+	  }
+	  FILE *faces_debug_file = fopen("faces.debug", "ab+");
+	  fprintf(faces_debug_file,
+					"f%d:\t, %d{%d %d %d}; %d{%d %d %d}; %d{%d %d %d}; %d{%d %d %d}; \n",
+					face_debug_count++,
+					borderFacet.VertexIndex(0), (INT)vertexPoint[0][0], (INT)vertexPoint[0][1], (INT)vertexPoint[0][2],
+					borderFacet.VertexIndex(1), (INT)vertexPoint[1][0], (INT)vertexPoint[1][1], (INT)vertexPoint[1][2],
+					borderFacet.VertexIndex(2), (INT)vertexPoint[2][0], (INT)vertexPoint[2][1], (INT)vertexPoint[2][2],
+					borderFacet.VertexIndex(3), (INT)vertexPoint[3][0], (INT)vertexPoint[3][1], (INT)vertexPoint[3][2]);
+	  fclose(faces_debug_file);
+      RegisterQuad(face_debug_count, vertexPoint[0], vertexPoint[1], vertexPoint[2], vertexPoint[3]);
+	}
+
+	fprintf(files.faceFile,"\n4(%d %d %d %d)\n",
+			borderFacet.VertexIndex(0),
+			borderFacet.VertexIndex(1),
+			borderFacet.VertexIndex(2),
+			borderFacet.VertexIndex(3));
+	fprintf(files.ownerFile, "%d\n", borderFacet.CellIndex());
+  }
+
+  VOID ExportExteriorBoundaryFaces(sFOAM_FILE_POINTERS &files,
+		  BORDER_FACETS_TABLE &borderWhiteFacets, INT boundaryIndex,
+		  INT &numFacesWritten,
+		  std::vector<cPOINT3> &vertexPoints)
+  {
+	//write data into the boundry file
+	fprintf(files.boundaryFile, "%s\n{\n\ttype\t wall;\n\tnFaces\t %d;\n\tstartFace\t %d;\n}\n",
+			boundaryName[boundaryIndex],
+			(INT)borderWhiteFacets.size(),
+			numFacesWritten);
+
+	for (INT i=0; i < (INT)borderWhiteFacets.size(); i++)
+	  ExportBorderWhiteFacet(files, borderWhiteFacets[i], vertexPoints);
+	numFacesWritten += (INT)borderWhiteFacets.size();
+  }
+
+  VOID ExportInputGeometryBoundary(sFOAM_FILE_POINTERS &files,
+		  cVOLUMETRIC_GRID &grid, std::vector<INT> &interiorBoundaryFaces,
+		  std::vector<INT> &validVtxMap, INT &numFacesWritten,
+		  std::vector<cPOINT3> &vertexPoints)
+  {
+	//write data into the boundry file
+	fprintf(files.boundaryFile, "%s\n{\n\ttype\t wall;\n\tnFaces\t %d;\n\tstartFace\t %d;\n}\n",
+			  boundaryName[6],
+			  (INT)interiorBoundaryFaces.size(),
+			  numFacesWritten);
+
+	for (INT i=0; i < (INT)interiorBoundaryFaces.size(); i++){
+		  ExportFace(files, grid, interiorBoundaryFaces[i],
+			  validVtxMap, vertexPoints);
+	}
+  }
+
+  /*
+   * This file will write owner, neighbour, boundary file and faces file.
+   * First all the interior faces are written then, boundary faces are written
+   * out and boundary file is setup.
+   *
+   * A very dumb implementation.
+   */
+  VOID ExportGridFacesToFoam(sFOAM_FILE_POINTERS &files,
+			     cVOLUMETRIC_GRID &grid, cBOB *bob,
+			     std::vector<INT> &validVtxMap,
+			     std::vector<cPOINT3> &vertexPoints )
+  {
+//    std::vector<bool> boundaryFacesOld(grid.LargestFacetIndex() + 1, false);
+    cBOX3 simVol = grid.SimulationVolume();
+    bob->InitCellIndex(grid.NumCells());
+//    grid.Print();
+    cVOLUMETRIC_GRID::facet_iterator currFacet = grid.FacetsBegin();
+    cVOLUMETRIC_GRID::facet_iterator lastFacet = grid.FacetsEnd();
+    INT numInteriorBoundaryFacets = 0;
+    std::vector<INT> interiorBoundaryFaces;
+
+    for( ; currFacet != lastFacet ; currFacet++ ){
+
+      if(currFacet->IsBoundary() &&
+    		  !FacetIsOnInterface(grid, currFacet->Index(), bob)){
+//    	printf("boundary face: ");
+//    	currFacet->Print();
+//        boundaryFacesOld[currFacet->Index()] = true;
+        numInteriorBoundaryFacets++;
+        interiorBoundaryFaces.push_back(currFacet->Index());
+      }
+    }
+
+    INT numFacesWritten = 0;
+
+    std::vector<BOOL> facesExported(grid.LargestFacetIndex() + 1, false);
+
+    INT totalNumFacets = grid.NumFaces() + bob->NumFacets();
+    INT numInteriorFacets = grid.NumInteriorFaces();
+    INT numBoundaryFacets = numInteriorBoundaryFacets +
+				bob->NumExternalBoundaryFacets();
+
+    fprintf(files.faceFile, "%d\n(\n", totalNumFacets);
+    fprintf(files.ownerFile, "%d\n(\n", totalNumFacets);
+    fprintf(files.neighbourFile, "%d\n(\n", totalNumFacets - numBoundaryFacets);
+
+    //If any of the cells are deleted, the loop will fail.
+    for(INT i = 0; i < (INT)grid.NumCells(); i++) {
+      numFacesWritten += ExportCell(files, grid, bob, i, facesExported,
+    		  validVtxMap, vertexPoints);
+    }
+
+//    for (INT i = 0; i< (INT)facesExported.size(); i++){
+//    	if (!facesExported[i])
+//    		printf("facesExported %d = false\n", i);
+//    }
+//    for (INT i = 0; i< (INT)boundaryFacesOld.size(); i++){
+//    	if (boundaryFacesOld[i])
+//    		printf("boundaryFacesOld %d = true\n", i);
+//    }
+
+//    std::vector<cBORDER_FACET_RECORD> borderWhiteFacets;
+    BORDER_FACETS_TABLE borderWhiteFacets[6];
+
+    for(INT i = 0; i < bob->NumCells(); i++) {
+      cWHITE_CELL whiteCell = bob->ComputeWhiteCell(i);
+      numFacesWritten += ExportWhiteCell(files, whiteCell, borderWhiteFacets, vertexPoints);
+    }
+
+    fprintf(files.boundaryFile,"7\n(\n");
+    for (INT c=0; c<6; c++)
+      ExportExteriorBoundaryFaces(files, borderWhiteFacets[c], c, numFacesWritten, vertexPoints);
+
+    //Writing input geometry face
+    ExportInputGeometryBoundary(files, grid, interiorBoundaryFaces, validVtxMap,
+    		numFacesWritten, vertexPoints);
+
+    fprintf(files.faceFile, ")\n");
+    fprintf(files.ownerFile, ")\n");
+    fprintf(files.neighbourFile, ")\n");
+    fprintf(files.boundaryFile, ")\n");
+  }
+
+  VOID ExportGridToFoam(const std::string &filePath,
+			  cVOLUMETRIC_GRID &cutCellGrid, cBOB *bob)
+  {
+    sFOAM_FILE_POINTERS files;
+
+    OpenFoamFiles(files, filePath, cutCellGrid);
+
+    /*
+     * Export points and export faces.
+     */
+    std::vector<INT> validVtxMap(cutCellGrid.LargestVertexIndex() + 1);
+    std::vector<cPOINT3> vertexPoints;
+    printf("Exporting grid vertices to OpenFOAM files....\n");
+    ExportGridVerticesToFoam(files.pointFile, cutCellGrid, validVtxMap, bob, vertexPoints);
+
+    printf("Exporting grid cells to OpenFOAM files....\n");
+
+    ExportGridFacesToFoam(files, cutCellGrid, bob, validVtxMap, vertexPoints);
+    CloseFoamFiles(files);
+  }
+
+}//namespace

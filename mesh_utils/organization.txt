@@ -1,0 +1,7 @@
+Component name : mesh_utils
+   Place holder to add more functionality to tMESH. For now contains definition of a face,
+   which is just a collection of facets, with a name.
+
+   Files
+	face.hpp : Contains definition of cFACE.
+

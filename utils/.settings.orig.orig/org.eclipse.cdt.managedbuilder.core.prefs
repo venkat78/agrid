@@ -1,0 +1,21 @@
+#Wed Dec 31 17:23:46 EST 2008
+cdt.managedbuild.config.gnu.lib.release.453091176/internalBuilder/ignoreErr=true
+environment/buildEnvironmentLibrary/cdt.managedbuild.config.gnu.exe.debug.2018560110=<?xml version\="1.0"?>\n<environment>\n  <variable name\="LIBRARY_PATH" operation\="remove"/>\n</environment>
+cdt.managedbuild.config.gnu.lib.debug.1832727791/internalBuilder/enabled=false
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.exe.debug.2018560110=<?xml version\="1.0"?>\n<environment>\n  <variable name\="CPLUS_INCLUDE_PATH" operation\="remove"/>\n  <variable name\="CPATH" operation\="remove"/>\n  <variable name\="C_INCLUDE_PATH" operation\="remove"/>\n</environment>
+eclipse.preferences.version=1
+cdt.managedbuild.config.gnu.exe.debug.2018560110/internalBuilder/enabled=false
+cdt.managedbuild.config.gnu.exe.debug.2018560110/internalBuilder/ignoreErr=true
+cdt.managedbuild.config.gnu.lib.debug.1832727791/internalBuilder/ignoreErr=true
+cdt.managedbuild.config.gnu.lib.release.1234199261/internalBuilder/enabled=false
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.1098338404=<?xml version\="1.0"?>\n<environment>\n  <variable name\="CPLUS_INCLUDE_PATH" operation\="remove"/>\n  <variable name\="CPATH" operation\="remove"/>\n  <variable name\="C_INCLUDE_PATH" operation\="remove"/>\n</environment>
+cdt.managedbuild.config.gnu.lib.debug.1098338404/internalBuilder/ignoreErr=true
+environment/buildEnvironmentInclude/cdt.managedbuild.config.gnu.lib.debug.1832727791=<?xml version\="1.0"?>\n<environment>\n  <variable name\="CPLUS_INCLUDE_PATH" operation\="remove"/>\n  <variable name\="CPATH" operation\="remove"/>\n  <variable name\="C_INCLUDE_PATH" operation\="remove"/>\n</environment>
+environment/project/cdt.managedbuild.config.gnu.exe.debug.2018560110=<?xml version\="1.0"?>\n<environment/>
+cdt.managedbuild.config.gnu.lib.debug.1098338404/internalBuilder/enabled=false
+environment/project=<?xml version\="1.0"?>\n<environment/>
+environment/project/cdt.managedbuild.config.gnu.lib.debug.1098338404=<?xml version\="1.0"?>\n<environment/>
+cdt.managedbuild.config.gnu.lib.release.1234199261/internalBuilder/ignoreErr=true
+cdt.managedbuild.config.gnu.lib.release.453091176/internalBuilder/enabled=false
+cdt.managedbuild.config.gnu.exe.release.638884726/internalBuilder/enabled=false
+cdt.managedbuild.config.gnu.exe.release.638884726/internalBuilder/ignoreErr=true

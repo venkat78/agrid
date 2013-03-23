@@ -1,0 +1,8 @@
+Component name : spatial_trees.
+   Contains generic class tTREE which can be used to construct various spatial trees
+   like quadtree, octree, Kd-tree etc. 
+
+   Files
+   -----
+	tree.hpp : Contains implementation of tTREE
+	standard_trees.hpp : Contains partial specializations for QUADTREE and OCTREE.

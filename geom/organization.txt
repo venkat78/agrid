@@ -1,0 +1,13 @@
+Component name : geom
+   Contains implementation of basic geometry types in two and three dimensions.
+   Types implemented are vector, point, segment, line, ray, triangle, box, plane.
+
+   Files
+   -----
+	numerics2d.hpp,cpp numerics3d.hpp,cpp : Contain generic numerical methods.
+	do_intersect.hpp,cpp : Contains intersection tests.
+	intersection.hpp,cpp : Contains actual intersection calculations.
+
+
+  classes cGEOM_2D_KERNEL and cGEOM_3D_KERNEL abstract basic types into geometry kernel for
+  spatial_trees component.

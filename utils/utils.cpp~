@@ -1,0 +1,18 @@
+#include "table.hpp"
+
+BOOL debugOn = FALSE;
+
+VOID SetDebugOn()
+{
+  debugOn = TRUE;
+}
+
+VOID SetDebugOff()
+{
+  debugOn = FALSE;
+}
+
+BOOL IsDebugOn()
+{
+  return debugOn;
+}

@@ -1,0 +1,54 @@
+Component name : agrid-boolean
+   Contains meat of the implementation of cut-cell generation and export to openfoam.
+
+   Files
+   -----
+	index.hpp
+	   Implements iCELL_INDEX which represents 3-integer tuple of a grid cell in the 
+	   rectilinear grid. Also contains definition of maps to store color of cells
+	   in a grid.
+
+	rectilinear_grid.hpp,cpp
+	   Abstraction of 3D box grid indexed by integer 3-tuples. Supports functionality
+	   to mark colors of individual cells. Initial advancing front in cut-cell generation
+	   is implemented in this class. Each cSURFACE_MESH::cMANIFOLD gets it's own rectilinear
+	   grid.
+
+	manifold_record.hpp,cpp
+	   Place holder of information related to a manifold being processed.
+	   
+        cut_cells_generator.hpp,cpp
+	   This class is where all the action is. Important methods of the class are
+	   
+	   Register()
+	      -- Clips the mesh by grid planes and registers manifolds of individual meshes.
+
+	   Generate()
+	      -- Advancing front walk is performed for all manifolds.
+	      -- Cut-cells are generated for each manifold in gray-cells.
+	      -- Booleans will be part of this function.
+
+	   BuildGrid()
+	      -- Builds entire volumetric grid, by stitching cut-cells and white-cells
+		 using cCUT_CELLS_ADHESIVE class.
+	
+	cut_cells_generator.hpp,cpp
+	      -- cut-cells generation for individual gray cells is implemented in this
+		 file. More detailed description can be found in cut_cell_algorithm.txt
+		 
+	cut_cells_adhesive.hpp,cpp
+	      -- Populates a volumetric grid which holds all the cut-cells for the case.
+	      -- Steps involved in gluing a cut-cell into volumetric grid are.
+		 1. For each cut-cell vertex, find the corresponding grid-vertex. If
+		    required a new grid vertex is created for the cut-cell vertex.
+
+		 2. For each cut-cell face, find the corresponding grid-face. If
+		    required a new grid face is created for the cut-cell face.
+
+		 3. A grid-cell is created for the cut-cell and grid-faces are recorded
+		    in the grid-cell and each grid-face records the grid-cell created.
+
+
+	foam_export.hpp,cpp
+	       -- Exports a volumetric grid into openfoam format.
+

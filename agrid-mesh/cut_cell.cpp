@@ -1,0 +1,6 @@
+#include "cut_cell.hpp"
+#include "tmesh.cpp"
+
+GEN_SUB_MESH(tCUT_CELL, sCUT_CELL_STORAGE_POLICY, tMESH_OBJECT_FACTORY,
+	     tCUT_CELL_VERTEX, tHALF_EDGE, tCUT_CELL_FACET);
+

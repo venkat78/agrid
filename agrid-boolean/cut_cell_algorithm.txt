@@ -1,0 +1,49 @@
+  /*
+   *   Algorithm.
+   *   The basic idea is to start with a mesh representing the box,
+   *   edit the mesh using euler operators and carve out the cut-cells
+   *   by repeatedly editing the mesh.
+   *
+   *   From here on mesh representing the cell box is refered to as 
+   *   cellMesh.
+   *
+   *   NOTE: On creation of cellMesh, the first eight vertices are 
+   *         are corner vertices and cell faces are represented as
+   *         quads.
+   *
+   *   1. Derive color of corner vertices of cellMesh from the grid
+   *      based on advancing front walk.
+   *
+   *   2. Register input geometry vertices on cellMesh edges. If the
+   *      vertices coincide with corner vertices of cell box, then
+   *      the corresponding corner vertices are marked as GRAY. 
+   *  
+   *      NOTE: Since new GRAY vertices are inserted on half-edges, 
+   *            all of them are in correct order on the cell edge.
+   *
+   *    
+   *   3. For each WHITE corner vertex, for all faces incident
+   *      on the vertex, 
+   *
+   *      Start walking the facet from the white vertex, note vertex
+   *      transitions from WHITE-->GRAY and GRAY-->WHITE. If there
+   *      are successful transitions, insert a diagonal between the
+   *      transition vertices.
+   *
+   *      At this point all the requisite cuts are made in cellMesh.
+   *
+   *   DEFN : A facet is BLACK, if there are no WHITE vertices.
+   *
+   *   4. Delete all BLACK facets in cellMesh.
+   *
+   *      NOTE: At this point, portions of the cut-cells on cell box faces remain.
+   *
+   *   5. Do a flood-fill to collect connected pieces (a.k.a SHELL building)
+   *      For each connected piece 
+   *        -- Create a cut-cell mesh, register in the corresponding gray-cell
+   *        
+   *        NOTE: Open boundary in the cut-cell mesh is the b-face polygon. 
+   *      
+   *      Create a facet to fill the open-boundary, this closes the cut-cell.
+   *
+   */

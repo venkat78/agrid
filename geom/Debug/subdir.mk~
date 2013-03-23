@@ -1,0 +1,66 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+# Add inputs and outputs from these tool invocations to the build variables 
+CPP_SRCS += \
+../box2.cpp \
+../box3.cpp \
+../do_intersect.cpp \
+../intersection.cpp \
+../line2.cpp \
+../numerics2d.cpp \
+../numerics3d.cpp \
+../plane3.cpp \
+../point3.cpp \
+../segment2.cpp \
+../segment3.cpp \
+../transform3.cpp \
+../triangle2.cpp \
+../triangle3.cpp \
+../vector3.cpp 
+
+OBJS += \
+./box2.o \
+./box3.o \
+./do_intersect.o \
+./intersection.o \
+./line2.o \
+./numerics2d.o \
+./numerics3d.o \
+./plane3.o \
+./point3.o \
+./segment2.o \
+./segment3.o \
+./transform3.o \
+./triangle2.o \
+./triangle3.o \
+./vector3.o 
+
+CPP_DEPS += \
+./box2.d \
+./box3.d \
+./do_intersect.d \
+./intersection.d \
+./line2.d \
+./numerics2d.d \
+./numerics3d.d \
+./plane3.d \
+./point3.d \
+./segment2.d \
+./segment3.d \
+./transform3.d \
+./triangle2.d \
+./triangle3.d \
+./vector3.d 
+
+
+# Each subdirectory must supply rules for building sources it contributes
+%.o: ../%.cpp
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C++ Compiler'
+	g++ -I"/home/raju/Desktop/workspace-20e/utils" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+

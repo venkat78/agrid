@@ -1,0 +1,10 @@
+Component name : surface_mesh
+   Contains cSURFACE_MESH which is an instantiation of tMESH class.  
+
+   Files
+   -----
+	cleanup.hpp,cpp 
+	    Contains code to cleanup a surface mesh.
+
+	surface_mesh_def.hpp
+	    Definition of cSURFACE_MESH.

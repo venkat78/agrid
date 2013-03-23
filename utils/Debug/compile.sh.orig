@@ -1,0 +1,8 @@
+#!/bin/sh
+
+sed -e "s:/home/bu/workspace-prototype-final-push-7:$1:g" subdir.mk > subdir1.mk
+mv subdir.mk subdir2.mk
+mv subdir1.mk subdir.mk
+make -j $2
+mv subdir2.mk subdir.mk
+
