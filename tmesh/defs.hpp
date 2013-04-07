@@ -8,6 +8,7 @@
 #define TMESH_DEFS_HPP_
 
 #include <cstdio>
+#include <cstring>
 #include <set>
 #include <ext/hash_map>
 
