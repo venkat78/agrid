@@ -22,8 +22,9 @@ using namespace mesh_utils;
 
 #include "surface_mesh.hpp"
 
-namespace model {
-	typedef INT iINDEX;
+namespace model
+{
+  typedef INT iINDEX;
 }
 
 #endif /* DEFS_H_ */
