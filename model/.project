@@ -3,6 +3,11 @@
 	<name>model</name>
 	<comment></comment>
 	<projects>
+		<project>geom</project>
+		<project>mesh_utils</project>
+		<project>surface_mesh</project>
+		<project>tmesh</project>
+		<project>utils</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
