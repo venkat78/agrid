@@ -8,6 +8,7 @@
 		<project>surface_mesh</project>
 		<project>tmesh</project>
 		<project>utils</project>
+		<project>spatial_trees</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

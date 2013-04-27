@@ -4,23 +4,20 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../geom_methods.cpp \
-../spatial_trees.cpp 
+../group.cpp 
 
 OBJS += \
-./geom_methods.o \
-./spatial_trees.o 
+./group.o 
 
 CPP_DEPS += \
-./geom_methods.d \
-./spatial_trees.d 
+./group.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
 %.o: ../%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I"/home/Bujji/git/agrid/utils" -I"/home/Bujji/git/agrid/geom" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I"/home/Bujji/git/agrid/surface_mesh" -I"/home/Bujji/git/agrid/spatial_trees" -I"/home/Bujji/git/agrid/utils" -I"/home/Bujji/git/agrid/tmesh" -I"/home/Bujji/git/agrid/mesh_utils" -I"/home/Bujji/git/agrid/geom" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
