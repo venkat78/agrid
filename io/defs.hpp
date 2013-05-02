@@ -19,4 +19,7 @@ using namespace mesh_utils;
 #include "surface_mesh.hpp"
 //using namespace surface_mesh;
 
+#include "model_export.hpp"
+using namespace model;
+
 #endif /*IO_DEFS_HPP_*/
