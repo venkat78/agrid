@@ -15,101 +15,88 @@
 
 namespace model
 {
-template<typename MESH_TYPE, typename ATTRIBUTES_TYPE>
-struct tGROUP
-{
-	typedef tGROUP<MESH_TYPE, ATTRIBUTES_TYPE> cSELF;
-
-public:
-
-	iINDEX GetIndex()
+	template<typename MESH_TYPE, typename ATTRIBUTES_TYPE>
+	struct tGROUP
 	{
-		return m_index;
-	}
+		typedef tGROUP<MESH_TYPE, ATTRIBUTES_TYPE> cSELF;
 
-	INT NumChildren()
-	{
-		return m_children.size();
-	}
+	public:
 
-	cSELF*
-	GetParent()
-	{
-		return m_parent;
-	}
+		iGROUP GetIndex() {
+			return m_index;
+		}
 
-	cSELF*
-	GetChildGroup(const std::string &name);
+		INT NumChildren() {
+			return m_children.size();
+		}
 
-	VOID SetIndex(iINDEX index)
-	{
-		m_index = index;
-	}
+		cSELF*
+		GetParent()
+		{
+			return m_parent;
+		}
 
-	VOID SetMesh(MESH_TYPE *mesh)
-	{
-		m_mesh = mesh;
-	}
+		cSELF*
+		GetChildGroup(const std::string &name);
 
-	MESH_TYPE*
-	GetMesh()
-	{
-		return m_mesh;
-	}
+		VOID SetIndex(iGROUP index) {
+			m_index = index;
+		}
 
-	ATTRIBUTES_TYPE*
-	GetAttributes()
-	{
-		return m_attributes;
-	}
+		VOID SetMesh(MESH_TYPE *mesh) {
+			m_mesh = mesh;
+		}
 
-	VOID SetAttributes(ATTRIBUTES_TYPE *attrib)
-	{
-		m_attributes = attrib;
-	}
+		MESH_TYPE*
+		GetMesh()
+		{
+			return m_mesh;
+		}
 
-	BOOL IsMeshRoot()
-	{
-		return (m_mesh != NULL)
-				&& ((m_parent == NULL) || (m_parent->m_mesh == NULL));
-	}
+		ATTRIBUTES_TYPE*
+		GetAttributes()
+		{
+			return m_attributes;
+		}
 
-	std::vector<cSELF*>*
-	GetChildren()
-	{
-		return &m_children;
-	}
+		BOOL IsMeshRoot() {
+			return (m_mesh != NULL) && ((m_parent == NULL) || (m_parent->m_mesh == NULL));
+		}
 
-public:
-	VOID SetParent(cSELF *parent)
-	{
-		m_parent = parent;
-	}
+		std::vector<cSELF*>*
+		GetChildren()
+		{
+			return &m_children;
+		}
 
-public:
-	tGROUP()
-	{
-		m_attributes = NULL;
-		m_mesh = NULL;
-		m_parent = NULL;
-	}
+	public:
+		VOID SetParent(cSELF *parent) {
+			m_parent = parent;
+		}
 
-	~tGROUP()
-	{
-	}
+	public:
+		tGROUP() {
+			m_index = INVALID_GROUP_INDEX;
+			m_attributes = new ATTRIBUTES_TYPE;
+			m_mesh = NULL;
+			m_parent = NULL;
+		}
 
-private:
-	VOID GetDescendants(std::vector<cSELF*> &descendants);
+		~tGROUP() {
+		}
 
-protected:
-	cSELF* m_parent;
-	MESH_TYPE *m_mesh;
-	std::string m_type;
-	std::string m_name;
-	std::vector<cSELF*> m_children;
-	iINDEX m_index;
-	ATTRIBUTES_TYPE *m_attributes;
-};
+	private:
+		VOID GetDescendants(std::vector<cSELF*> &descendants);
+
+	protected:
+		cSELF* m_parent;
+		MESH_TYPE *m_mesh;
+		std::string m_type;
+		std::string m_name;
+		std::vector<cSELF*> m_children;
+		iGROUP m_index;
+		ATTRIBUTES_TYPE *m_attributes;
+	};
 
 }
 

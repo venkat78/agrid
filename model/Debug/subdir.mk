@@ -4,12 +4,15 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../amoeba_model.cpp \
 ../group.cpp 
 
 OBJS += \
+./amoeba_model.o \
 ./group.o 
 
 CPP_DEPS += \
+./amoeba_model.d \
 ./group.d 
 
 

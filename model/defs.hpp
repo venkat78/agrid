@@ -25,6 +25,12 @@ using namespace mesh_utils;
 namespace model
 {
   typedef INT iINDEX;
+  typedef iINDEX iGROUP;
+  typedef iINDEX iMESH;
+
+  const iMESH INVALID_MESH_INDEX = -55;
+  const iGROUP INVALID_GROUP_INDEX = -66;
+
 }
 
 #endif /* DEFS_H_ */
