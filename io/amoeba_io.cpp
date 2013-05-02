@@ -25,6 +25,8 @@ namespace io
 			if (objType == H5G_GROUP) {
 				Group childGroup = g.openGroup(objName);
 				cGROUP *cgInModel = model.CreateGroup();
+				cgInModel->SetName(objName);
+				std::cout<<pgInModel->GetName().c_str()<< '/'<<cgInModel->GetName().c_str()<<std::endl;
 				pgInModel->AddChildGroup(cgInModel);
 				ReadAmoebaGroup(childGroup, cgInModel, model);
 		}
@@ -48,6 +50,8 @@ BOOL ImportAmoebaModel(const std::string &fname, cAMOEBA_MODEL &model) {
 		 */
 		H5File file(fname, H5F_ACC_RDONLY);
 		cGROUP *simGroup = model.CreateGroup();
+		model.SetRootGroup(simGroup);
+		simGroup->SetName(GROUP_NAME);
 		Group hdfGroup = file.openGroup(GROUP_NAME);
 
 		ReadAmoebaGroup(hdfGroup, simGroup, model);

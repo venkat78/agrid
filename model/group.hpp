@@ -69,6 +69,10 @@ namespace model
 			return &m_children;
 		}
 
+		const std::string& GetName() {
+			return m_name;
+		}
+
 	public:
 		VOID SetParent(cSELF *parent) {
 			m_parent = parent;
@@ -78,6 +82,9 @@ namespace model
 			m_children.push_back(group);
 		}
 
+		VOID SetName(const std::string &name) {
+			m_name = name;
+		}
 	public:
 		tGROUP() {
 			m_index = INVALID_GROUP_INDEX;
@@ -101,6 +108,24 @@ namespace model
 		iGROUP m_index;
 		ATTRIBUTES_TYPE *m_attributes;
 	};
+
+	template<typename MESH_TYPE, typename ATTRIBUTES_TYPE>
+	VOID tGROUP<MESH_TYPE, ATTRIBUTES_TYPE>::GetDescendants(std::vector<cSELF*> &descendants) {
+		return m_parent->m_children.size() == 0;
+
+		INT currIndex = 0;
+		descendants.push_back(this);
+		while (currIndex < descendants.size()) {
+			cSELF* currDescendant = descendants[currIndex];
+			std::vector<cSELF*> *children = GetChildren();
+
+			if (children) {
+				descendants.push_back(descendants.end(), children->begin(), children->end());
+			}
+
+			currIndex++;
+		}
+	}
 
 }
 

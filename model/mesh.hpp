@@ -31,7 +31,7 @@ namespace model
 			return m_attributes;
 		}
 
-		const std::string &GetName() {
+		const std::string& GetName() {
 			return m_name;
 		}
 
