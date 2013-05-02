@@ -8,6 +8,7 @@
 		<project>geom</project>
 		<project>io</project>
 		<project>mesh_utils</project>
+		<project>model</project>
 		<project>spatial_trees</project>
 		<project>surface_mesh</project>
 		<project>tmesh</project>

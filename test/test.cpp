@@ -10,6 +10,7 @@
 #include "io.hpp"
 #include "agrid_mesh.hpp"
 #include "agrid_boolean.hpp"
+#include "model_export.hpp"
 
 using namespace utils;
 using namespace geom;
@@ -17,6 +18,7 @@ using namespace geom;
 using namespace tmesh;
 using namespace spatial_trees;
 using namespace mesh_utils;
+using namespace model;
 using namespace io;
 using namespace agrid_boolean;
 
@@ -733,323 +735,327 @@ BOOL read_facets(char* file_path)
 
 //generating and merging off and map files is described in a document "Generating off files"
 //located in this directory
-int main(int argc, char **argv)
-{
-  REAL boxCoords[6];
-  INT nCells[3];
-
-  printoutLevel = 2;
-  char *file_name = NULL, *file_ops = NULL, *file_path = NULL;
-
-//  file_name = argv[1]; file_ops = argv[2]; file_path = argv[3];
-
-  file_name = "data.stl"; //YG - temp
-  file_ops = "data.in"; //YG - temp
-  file_path = "output"; //YG - temp
-
-
-/*
-  read_vertices(file_path);
-  read_facets(file_path);
-*/
-  char *cell_test_file_name = "cell.test";
-
-  FILE *cell_test_file = fopen(cell_test_file_name, "rb+");
-  cFOAM_READER foamReader("file_path");
-  cCELL_OFF_WRITER cellWriter(&foamReader);
-
-  if (cell_test_file != NULL){
-	foamReader.Import();
-
-	while (cell_test_file != NULL){
-	  INT cellIndex = -1;
-	  if (fscanf(cell_test_file, "%d", &cellIndex) == EOF){
-		fclose(cell_test_file);
-		cell_test_file = NULL;
-	  }
-	  else
-		cellWriter.AddCellIndex(cellIndex);
-//	  io::GenerateCellOffFiles(cellIndex, file_path, &cellIndexVector, &cellBoxVector);
-	}
-	cellWriter.WriteOffFiles();
-  }
-
-  const char *merge_file_name = "merge.test";
-  FILE *merge_file = fopen(merge_file_name, "rb+");
-  if (merge_file != NULL){
-	char b1[128], b2[128];
-	fscanf(merge_file, "%s %s", b1, b2);
-	merge_off_map_files(b1, b2);
-	fclose(merge_file);
-	printf("Created Merged Files\n");
-	return 0;
-  }
-
-  cSURFACE_MESH mesh;
-  FILE *file =  fopen(file_name, "rb+");
-  ImportStl(file, mesh);
-  fclose(file);
-  file = NULL;
-  if (mesh.NumFacets() == 0){
-	printf("ERROR: Empty Mesh\n");
-	return 1;
-  }
-
-  printf("Input Mesh Bounding Box:\n");
-  mesh.BoundingBox().Print();
-  if (shadeAreaOnly){
-	DO_COORDS(c){
-	  REAL shadeArea = mesh.ShadeArea(c);
-	  printf("coord %c: shade area %lf\n", coordChar(c), shadeArea);
-	}
-	return 0;
-  }
-// testing for hole closure
-/*  CreateHole(mesh);
-  std::cout<<"Filling hole...\n";
-  cHOLE_FILLER holeFiller(&mesh);
-  return holeFiller.CloseHoles();
-*/
-
-  FILE *mtfile = fopen("mesh_init.txt", "wb");
-  mesh.Print(mtfile);
-  fclose(mtfile);
-  mtfile = NULL;
-
-  FILE *off_file = fopen("mesh_init.off", "wb+");
-  ExportToOff(off_file, mesh);
-  fclose(off_file);
-
-  std::cout<<"Merging coplanar facets...\n";
-  cFACET_MERGER facetMerger(&mesh);
-  facetMerger.MergeCoplanarFacets();
-  if (!mesh.Verify()){
-	  printf("mesh verify failed\n");
-	  mesh.Verify();
-  }
-
-  off_file = fopen("mesh_merged_facets.off", "wb+");
-  ExportToOff(off_file, mesh);
-  fclose(off_file);
-  mtfile = fopen("mesh_merged_facets.txt", "wb");
-  mesh.Print(mtfile);
-  fclose(mtfile);
-  mtfile = NULL;
-
-  std::cout<<"Building manifolds...\n";
-  mesh.ConstructManifolds();
-
-  printf("Mesh contains %d manifolds\n", mesh.NumManifolds());
-  mtfile = fopen("mesh_init-Manifolds.txt", "wb");
-  mesh.Print(mtfile);
-  fclose(mtfile);
-  mtfile = NULL;
-
-  printf("mesh has %d border edges\n", mesh.NumBorderEdges());
-   mtfile = fopen("mesh_borderedges_before.txt", "wb");
-   mesh.PrintBorderEdges(mtfile);
-   fclose(mtfile);
-   mtfile = NULL;
-/*
-   cCYLINDER_BUILDER cylinderBuilder(&mesh);
-   cylinderBuilder.RecomputeAll();
-   off_file = fopen("mesh_cylinders_rebuilt.off", "wb+");
-   ExportToOff(off_file, mesh);
-   fclose(off_file);
-*/
-
-/* for oxy temporarily
-   cHOLE_CLOSER holeCLoser(&mesh, INVALID_IMANIFOLD);
-   holeCLoser.CloseHoles();
-   printf("after closing simple holes mesh has %d border edges\n", mesh.NumBorderEdges());
-*/
-   /*
-   cHOLE_FILLER holeFiller(&mesh);
-   holeFiller.Perform();
-*/
-   for (iMANIFOLD m = 0; m < mesh.NumManifolds(); m++){
-	 cSURFACE_MESH::cMANIFOLD *manifold = mesh.Manifold(m);
-	 char mfname[24];
-	 mfname[0] = '\0';
-	 if (manifold->IsOpen())
-	  sprintf(mfname, "manifold%dopen.off", m);
-	 else
-	   sprintf(mfname, "manifold%dclosed.off", m);
-	 ExportManifoldToOff(mfname, mesh, manifold->Index());
-	 printf("Manifold %d:\tNF %d\t", m, manifold->NumFacets());
-	 if (manifold->IsOpen()){
-      	mfname[0] = '\0';
-      	sprintf(mfname, "manifold%dborder-before.off", m);
-      	ExportManifoldBorderFacetsToOff(mfname, mesh, manifold->Index());
-        printf("Is Open. NBE %d\n", manifold->NumBorderEdges());
-//        cHOLE_CLOSER holeCLoser(&mesh, manifold->Index());
-//        holeCLoser.CloseHoles();
+//int main(int argc, char **argv)
+//{
+//  REAL boxCoords[6];
+//  INT nCells[3];
+//
+//  printoutLevel = 2;
+//  char *file_name = NULL, *file_ops = NULL, *file_path = NULL;
+//
+////  file_name = argv[1]; file_ops = argv[2]; file_path = argv[3];
+//
+//  file_name = "data.stl"; //YG - temp
+//  file_ops = "data.in"; //YG - temp
+//  file_path = "output"; //YG - temp
+//
+//
+///*
+//  read_vertices(file_path);
+//  read_facets(file_path);
+//*/
+//  char *cell_test_file_name = "cell.test";
+//
+//  FILE *cell_test_file = fopen(cell_test_file_name, "rb+");
+//  cFOAM_READER foamReader("file_path");
+//  cCELL_OFF_WRITER cellWriter(&foamReader);
+//
+//  if (cell_test_file != NULL){
+//	foamReader.Import();
+//
+//	while (cell_test_file != NULL){
+//	  INT cellIndex = -1;
+//	  if (fscanf(cell_test_file, "%d", &cellIndex) == EOF){
+//		fclose(cell_test_file);
+//		cell_test_file = NULL;
+//	  }
+//	  else
+//		cellWriter.AddCellIndex(cellIndex);
+////	  io::GenerateCellOffFiles(cellIndex, file_path, &cellIndexVector, &cellBoxVector);
+//	}
+//	cellWriter.WriteOffFiles();
+//  }
+//
+//  const char *merge_file_name = "merge.test";
+//  FILE *merge_file = fopen(merge_file_name, "rb+");
+//  if (merge_file != NULL){
+//	char b1[128], b2[128];
+//	fscanf(merge_file, "%s %s", b1, b2);
+//	merge_off_map_files(b1, b2);
+//	fclose(merge_file);
+//	printf("Created Merged Files\n");
+//	return 0;
+//  }
+//
+//  cSURFACE_MESH mesh;
+//  FILE *file =  fopen(file_name, "rb+");
+//  ImportStl(file, mesh);
+//  fclose(file);
+//  file = NULL;
+//  if (mesh.NumFacets() == 0){
+//	printf("ERROR: Empty Mesh\n");
+//	return 1;
+//  }
+//
+//  printf("Input Mesh Bounding Box:\n");
+//  mesh.BoundingBox().Print();
+//  if (shadeAreaOnly){
+//	DO_COORDS(c){
+//	  REAL shadeArea = mesh.ShadeArea(c);
+//	  printf("coord %c: shade area %lf\n", coordChar(c), shadeArea);
+//	}
+//	return 0;
+//  }
+//// testing for hole closure
+///*  CreateHole(mesh);
+//  std::cout<<"Filling hole...\n";
+//  cHOLE_FILLER holeFiller(&mesh);
+//  return holeFiller.CloseHoles();
+//*/
+//
+//  FILE *mtfile = fopen("mesh_init.txt", "wb");
+//  mesh.Print(mtfile);
+//  fclose(mtfile);
+//  mtfile = NULL;
+//
+//  FILE *off_file = fopen("mesh_init.off", "wb+");
+//  ExportToOff(off_file, mesh);
+//  fclose(off_file);
+//
+//  std::cout<<"Merging coplanar facets...\n";
+//  cFACET_MERGER facetMerger(&mesh);
+//  facetMerger.MergeCoplanarFacets();
+//  if (!mesh.Verify()){
+//	  printf("mesh verify failed\n");
+//	  mesh.Verify();
+//  }
+//
+//  off_file = fopen("mesh_merged_facets.off", "wb+");
+//  ExportToOff(off_file, mesh);
+//  fclose(off_file);
+//  mtfile = fopen("mesh_merged_facets.txt", "wb");
+//  mesh.Print(mtfile);
+//  fclose(mtfile);
+//  mtfile = NULL;
+//
+//  std::cout<<"Building manifolds...\n";
+//  mesh.ConstructManifolds();
+//
+//  printf("Mesh contains %d manifolds\n", mesh.NumManifolds());
+//  mtfile = fopen("mesh_init-Manifolds.txt", "wb");
+//  mesh.Print(mtfile);
+//  fclose(mtfile);
+//  mtfile = NULL;
+//
+//  printf("mesh has %d border edges\n", mesh.NumBorderEdges());
+//   mtfile = fopen("mesh_borderedges_before.txt", "wb");
+//   mesh.PrintBorderEdges(mtfile);
+//   fclose(mtfile);
+//   mtfile = NULL;
+///*
+//   cCYLINDER_BUILDER cylinderBuilder(&mesh);
+//   cylinderBuilder.RecomputeAll();
+//   off_file = fopen("mesh_cylinders_rebuilt.off", "wb+");
+//   ExportToOff(off_file, mesh);
+//   fclose(off_file);
+//*/
+//
+///* for oxy temporarily
+//   cHOLE_CLOSER holeCLoser(&mesh, INVALID_IMANIFOLD);
+//   holeCLoser.CloseHoles();
+//   printf("after closing simple holes mesh has %d border edges\n", mesh.NumBorderEdges());
+//*/
+//   /*
+//   cHOLE_FILLER holeFiller(&mesh);
+//   holeFiller.Perform();
+//*/
+//   for (iMANIFOLD m = 0; m < mesh.NumManifolds(); m++){
+//	 cSURFACE_MESH::cMANIFOLD *manifold = mesh.Manifold(m);
+//	 char mfname[24];
+//	 mfname[0] = '\0';
+//	 if (manifold->IsOpen())
+//	  sprintf(mfname, "manifold%dopen.off", m);
+//	 else
+//	   sprintf(mfname, "manifold%dclosed.off", m);
+//	 ExportManifoldToOff(mfname, mesh, manifold->Index());
+//	 printf("Manifold %d:\tNF %d\t", m, manifold->NumFacets());
+//	 if (manifold->IsOpen()){
 //      	mfname[0] = '\0';
-//      	sprintf(mfname, "manifold%dborder-after.off", m);
+//      	sprintf(mfname, "manifold%dborder-before.off", m);
 //      	ExportManifoldBorderFacetsToOff(mfname, mesh, manifold->Index());
-
-
-//        mtfile = fopen("mesh_borderedges_after.txt", "wb");
-//         mesh.PrintBorderEdges(mtfile);
-//         fclose(mtfile);
-//         mtfile = NULL;
-//         printf("Mesh contains %d manifolds\n", mesh.NumManifolds());
-//         mtfile = fopen("mesh_after-Manifolds.txt", "wb");
-//          mesh.Print(mtfile);
-//          fclose(mtfile);
-//          mtfile = NULL;
-      }
-      else{
-        printf("Closed; \n");
-  //      if (manifold->NumFacets() >= maxManifoldNF){
-  //    	maxManifoldNF = manifold->NumFacets();
-  //    	maxManifoldLabel = m;
-  //      }
-      }
-     }
-
-   //Called again to recompute the number of border edges
-    //Manifolds are constructed three times, it needs to be reduced to at least 2.
-    mesh.ConstructManifolds();
-//    mesh.DeleteManifold(0);
-/*  mesh.PrintBorderEdges();*/
-  //INT maxManifoldNF = 0;
-//  iMANIFOLD maxManifoldLabel = -1;
-
-  for (iMANIFOLD m = 0; m < mesh.NumManifolds(); m++){
-    cSURFACE_MESH::cMANIFOLD *manifold = mesh.Manifold(m);
-//    printf("Manifold %d:\tNF %d\t", m, manifold->NumFacets());
-    if (manifold->IsOpen()){
-//      printf("Is Open. NBE %d\n", manifold->NumBorderEdges());
-      mesh.DeleteManifold(m);
-    }
-    else{
-//      printf("Closed; \n");
-//      if (manifold->NumFacets() >= maxManifoldNF){
-//    	maxManifoldNF = manifold->NumFacets();
-//    	maxManifoldLabel = m;
+//        printf("Is Open. NBE %d\n", manifold->NumBorderEdges());
+////        cHOLE_CLOSER holeCLoser(&mesh, manifold->Index());
+////        holeCLoser.CloseHoles();
+////      	mfname[0] = '\0';
+////      	sprintf(mfname, "manifold%dborder-after.off", m);
+////      	ExportManifoldBorderFacetsToOff(mfname, mesh, manifold->Index());
+//
+//
+////        mtfile = fopen("mesh_borderedges_after.txt", "wb");
+////         mesh.PrintBorderEdges(mtfile);
+////         fclose(mtfile);
+////         mtfile = NULL;
+////         printf("Mesh contains %d manifolds\n", mesh.NumManifolds());
+////         mtfile = fopen("mesh_after-Manifolds.txt", "wb");
+////          mesh.Print(mtfile);
+////          fclose(mtfile);
+////          mtfile = NULL;
 //      }
-    }
-   }
-  std::cout<<"Done building manifolds...\n";
+//      else{
+//        printf("Closed; \n");
+//  //      if (manifold->NumFacets() >= maxManifoldNF){
+//  //    	maxManifoldNF = manifold->NumFacets();
+//  //    	maxManifoldLabel = m;
+//  //      }
+//      }
+//     }
+//
+//   //Called again to recompute the number of border edges
+//    //Manifolds are constructed three times, it needs to be reduced to at least 2.
+//    mesh.ConstructManifolds();
+////    mesh.DeleteManifold(0);
+///*  mesh.PrintBorderEdges();*/
+//  //INT maxManifoldNF = 0;
+////  iMANIFOLD maxManifoldLabel = -1;
+//
+//  for (iMANIFOLD m = 0; m < mesh.NumManifolds(); m++){
+//    cSURFACE_MESH::cMANIFOLD *manifold = mesh.Manifold(m);
+////    printf("Manifold %d:\tNF %d\t", m, manifold->NumFacets());
+//    if (manifold->IsOpen()){
+////      printf("Is Open. NBE %d\n", manifold->NumBorderEdges());
+//      mesh.DeleteManifold(m);
+//    }
+//    else{
+////      printf("Closed; \n");
+////      if (manifold->NumFacets() >= maxManifoldNF){
+////    	maxManifoldNF = manifold->NumFacets();
+////    	maxManifoldLabel = m;
+////      }
+//    }
+//   }
+//  std::cout<<"Done building manifolds...\n";
+//
+//  //Called again so that the indexation of manifolds is
+//  //from 0 - n-1.
+//  mesh.ConstructManifolds();
+//  printf("Remaining Mesh Bounding Box:\n");
+//  mesh.BoundingBox().Print();
+//
+//  printf("Mesh has %d closed manifolds\n", mesh.NumManifolds());
+//  //sort the manifolds by the increasing number of facets
+//  std::vector <iMANIFOLD> manifoldIndex;
+//  manifoldIndex.reserve(mesh.NumManifolds());
+//  for (iMANIFOLD m = 0; m < mesh.NumManifolds(); m++){
+//	  manifoldIndex[m] = m;
+//  }
+//
+//  //sort manifolds by size
+//  BOOL swapped = false;
+//
+//  do {
+//    swapped = false;
+//    for (INT i=1; i < mesh.NumManifolds(); i++){
+//	  cSURFACE_MESH::cMANIFOLD *manifold0 = mesh.Manifold(manifoldIndex[i]);
+//	  cSURFACE_MESH::cMANIFOLD *manifold1 = mesh.Manifold(manifoldIndex[i-1]);
+//      if (manifold0->NumFacets() < manifold1->NumFacets()){
+//        INT mm = manifoldIndex[i];
+//        manifoldIndex[i] = manifoldIndex[i-1];
+//        manifoldIndex[i-1] = mm;
+//        swapped = true;
+//      }
+//    }
+//  } while (swapped);
+///*
+//  for (INT i=0; i < mesh.NumManifolds(); i++){
+//	cSURFACE_MESH::cMANIFOLD *manifold = mesh.Manifold(manifoldIndex[i]);
+//	ASSERT(manifold->Index() == manifoldIndex[i]);
+//	printf("%d\tm %d\tnf %d\n",
+//			i, manifoldIndex[i], manifold->NumFacets());
+//  }
+//*/
+//
+//  FILE *datafile = fopen(file_ops, "rb");
+//   if (datafile == NULL){
+//     printf("no data file\n");
+//     return (0);
+//   }
+//
+//   fscanf(datafile, "%lf %lf %lf %lf %lf %lf %d %d %d",
+// 	 boxCoords, boxCoords+1, boxCoords+2,
+// 	 boxCoords+3, boxCoords+4, boxCoords+5,
+// 	 nCells, nCells+1, nCells+2);
+//
+//   char buffer[20] = {'\0'};
+//   fscanf(datafile, "%s", buffer);
+//   fclose(datafile);
+//   datafile = NULL;
+//
+//  cBOX3 simVol(cPOINT3(boxCoords[0], boxCoords[1], boxCoords[2]),
+//	       cPOINT3(boxCoords[3], boxCoords[4], boxCoords[5]));
+//
+//  printf("SimVol:\n");
+//  simVol.Print();
+//
+//  if (!simVol.ContainsBox(mesh.BoundingBox())){
+//    printf("ERROR: SimVol does not contain the mesh\n");
+//    return 1;
+//  }
+//
+//  std::vector<cSURFACE_MESH*> meshes;
+//  meshes.push_back(&mesh);
+//  agrid_test(simVol, nCells, meshes, cellWriter, file_name, file_path);
+//  printf("SUCCESSFUL EXIT\n");
+//  return 0;
+//
+////  printf("nCells: %d %d %d\n", nCells[0], nCells[1], nCells[2]);
+//  //try individual manifolds and pairs first
+////  printf("generating Grid for Single Manifolds...\n");
+//  std::vector <iMANIFOLD> manifolds;
+///*
+//  for (INT i = 0; i < mesh.NumManifolds(); i++){
+////	  for (INT i = 65; i < 66; i++){
+//	cSURFACE_MESH subMesh;
+//	manifolds.clear();
+//	manifolds.push_back(manifoldIndex[i]);
+//	MeshFromManifolds(manifolds, mesh, subMesh);
+//	INT NFInit = subMesh.NumFacets();
+//	printf("count = %d\t; NF %d\n", i, NFInit);
+//	std::vector<cSURFACE_MESH*> meshes;
+//	meshes.push_back(&subMesh);
+//	if (!agrid_test(simVol, nCells, meshes, cellWriter, file_name, file_path)){
+//	  FILE *problems = fopen("problems.txt", "ab+");
+//	  fprintf(problems, "count = %d\t; NF %d\n", i, NFInit);
+//	  fclose(problems);
+//	}
+//  }
+//*/
+//  INT i0 = 1, j0 = 32;
+//  for (INT i = i0; i < i0+1; i++){
+//	INT jmin = j0;
+//	for (INT j = jmin; j < jmin+1; j++){
+//		  //these manifolds have problems by themselves
+//		cSURFACE_MESH subMesh;
+//		manifolds.clear();
+//		manifolds.push_back(manifoldIndex[i]);
+//		manifolds.push_back(manifoldIndex[j]);
+//		MeshFromManifolds(manifolds, mesh, subMesh);
+//		INT NFInit = subMesh.NumFacets();
+//		printf("count = %d %d\t; NF %d\n", i, j, NFInit);
+//		std::vector<cSURFACE_MESH*> meshes;
+//		meshes.push_back(&subMesh);
+//		if (!agrid_test(simVol, nCells, meshes, cellWriter, file_name, file_path)){
+//		  FILE *problems = fopen("problems.txt", "ab+");
+//		  fprintf(problems, "count = %d %d\t; NF %d\n", i, j, NFInit);
+//		  fclose(problems);
+//		}
+//	}
+//  }
+//  printf("SUCCESSFUL EXIT\n");
+//  return 0;
+//}
 
-  //Called again so that the indexation of manifolds is
-  //from 0 - n-1.
-  mesh.ConstructManifolds();
-  printf("Remaining Mesh Bounding Box:\n");
-  mesh.BoundingBox().Print();
-
-  printf("Mesh has %d closed manifolds\n", mesh.NumManifolds());
-  //sort the manifolds by the increasing number of facets
-  std::vector <iMANIFOLD> manifoldIndex;
-  manifoldIndex.reserve(mesh.NumManifolds());
-  for (iMANIFOLD m = 0; m < mesh.NumManifolds(); m++){
-	  manifoldIndex[m] = m;
-  }
-
-  //sort manifolds by size
-  BOOL swapped = false;
-
-  do {
-    swapped = false;
-    for (INT i=1; i < mesh.NumManifolds(); i++){
-	  cSURFACE_MESH::cMANIFOLD *manifold0 = mesh.Manifold(manifoldIndex[i]);
-	  cSURFACE_MESH::cMANIFOLD *manifold1 = mesh.Manifold(manifoldIndex[i-1]);
-      if (manifold0->NumFacets() < manifold1->NumFacets()){
-        INT mm = manifoldIndex[i];
-        manifoldIndex[i] = manifoldIndex[i-1];
-        manifoldIndex[i-1] = mm;
-        swapped = true;
-      }
-    }
-  } while (swapped);
-/*
-  for (INT i=0; i < mesh.NumManifolds(); i++){
-	cSURFACE_MESH::cMANIFOLD *manifold = mesh.Manifold(manifoldIndex[i]);
-	ASSERT(manifold->Index() == manifoldIndex[i]);
-	printf("%d\tm %d\tnf %d\n",
-			i, manifoldIndex[i], manifold->NumFacets());
-  }
-*/
-
-  FILE *datafile = fopen(file_ops, "rb");
-   if (datafile == NULL){
-     printf("no data file\n");
-     return (0);
-   }
-
-   fscanf(datafile, "%lf %lf %lf %lf %lf %lf %d %d %d",
- 	 boxCoords, boxCoords+1, boxCoords+2,
- 	 boxCoords+3, boxCoords+4, boxCoords+5,
- 	 nCells, nCells+1, nCells+2);
-
-   char buffer[20] = {'\0'};
-   fscanf(datafile, "%s", buffer);
-   fclose(datafile);
-   datafile = NULL;
-
-  cBOX3 simVol(cPOINT3(boxCoords[0], boxCoords[1], boxCoords[2]),
-	       cPOINT3(boxCoords[3], boxCoords[4], boxCoords[5]));
-
-  printf("SimVol:\n");
-  simVol.Print();
-
-  if (!simVol.ContainsBox(mesh.BoundingBox())){
-    printf("ERROR: SimVol does not contain the mesh\n");
-    return 1;
-  }
-
-  std::vector<cSURFACE_MESH*> meshes;
-  meshes.push_back(&mesh);
-  agrid_test(simVol, nCells, meshes, cellWriter, file_name, file_path);
-  printf("SUCCESSFUL EXIT\n");
-  return 0;
-
-//  printf("nCells: %d %d %d\n", nCells[0], nCells[1], nCells[2]);
-  //try individual manifolds and pairs first
-//  printf("generating Grid for Single Manifolds...\n");
-  std::vector <iMANIFOLD> manifolds;
-/*
-  for (INT i = 0; i < mesh.NumManifolds(); i++){
-//	  for (INT i = 65; i < 66; i++){
-	cSURFACE_MESH subMesh;
-	manifolds.clear();
-	manifolds.push_back(manifoldIndex[i]);
-	MeshFromManifolds(manifolds, mesh, subMesh);
-	INT NFInit = subMesh.NumFacets();
-	printf("count = %d\t; NF %d\n", i, NFInit);
-	std::vector<cSURFACE_MESH*> meshes;
-	meshes.push_back(&subMesh);
-	if (!agrid_test(simVol, nCells, meshes, cellWriter, file_name, file_path)){
-	  FILE *problems = fopen("problems.txt", "ab+");
-	  fprintf(problems, "count = %d\t; NF %d\n", i, NFInit);
-	  fclose(problems);
-	}
-  }
-*/
-  INT i0 = 1, j0 = 32;
-  for (INT i = i0; i < i0+1; i++){
-	INT jmin = j0;
-	for (INT j = jmin; j < jmin+1; j++){
-		  //these manifolds have problems by themselves
-		cSURFACE_MESH subMesh;
-		manifolds.clear();
-		manifolds.push_back(manifoldIndex[i]);
-		manifolds.push_back(manifoldIndex[j]);
-		MeshFromManifolds(manifolds, mesh, subMesh);
-		INT NFInit = subMesh.NumFacets();
-		printf("count = %d %d\t; NF %d\n", i, j, NFInit);
-		std::vector<cSURFACE_MESH*> meshes;
-		meshes.push_back(&subMesh);
-		if (!agrid_test(simVol, nCells, meshes, cellWriter, file_name, file_path)){
-		  FILE *problems = fopen("problems.txt", "ab+");
-		  fprintf(problems, "count = %d %d\t; NF %d\n", i, j, NFInit);
-		  fclose(problems);
-		}
-	}
-  }
-  printf("SUCCESSFUL EXIT\n");
-  return 0;
+int main(int argc, char **argv)
+{	cAMOEBA_MODEL model;
+	io::ImportAmoebaModel(argv[1], model);
 }
-
 

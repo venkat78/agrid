@@ -9,7 +9,7 @@
 #define _MODEL_GROUP_HPP_
 
 #include "defs.hpp"
-#include <cstdio>
+
 #include <string>
 #include <vector>
 
@@ -72,6 +72,10 @@ namespace model
 	public:
 		VOID SetParent(cSELF *parent) {
 			m_parent = parent;
+		}
+
+		VOID AddChildGroup(cSELF *group) {
+			m_children.push_back(group);
 		}
 
 	public:

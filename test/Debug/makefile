@@ -43,7 +43,7 @@ all: test
 test: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L"/home/yury/git/agrid/io/Debug" -L"/home/yury/git/agrid/agrid-mesh/Debug" -L"/home/yury/git/agrid/agrid-boolean/Debug" -L"/home/yury/git/agrid/surface_mesh/Debug" -L"/home/yury/git/agrid/mesh_utils/Debug" -L"/home/yury/git/agrid/tmesh/Debug" -L"/home/yury/git/agrid/spatial_trees/Debug" -L"/home/yury/git/agrid/geom/Debug" -L"/home/yury/git/agrid/utils/Debug" -o"test" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L"/home/Bujji/git/agrid/io/Debug" -L"/home/Bujji/git/agrid/model/Debug" -L"/home/Bujji/git/agrid/agrid-mesh/Debug" -L"/home/Bujji/git/agrid/agrid-boolean/Debug" -L"/home/Bujji/git/agrid/surface_mesh/Debug" -L"/home/Bujji/git/agrid/mesh_utils/Debug" -L"/home/Bujji/git/agrid/tmesh/Debug" -L"/home/Bujji/git/agrid/spatial_trees/Debug" -L"/home/Bujji/git/agrid/geom/Debug" -L"/home/Bujji/git/agrid/utils/Debug" -o"test" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

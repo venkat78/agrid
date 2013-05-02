@@ -15,5 +15,6 @@
 #include "off_reader.hpp"
 #include "cell_off_writer.hpp"
 #include "off_merger.hpp"
+#include "amoeba_io.hpp"
 
 #endif /* IO_HPP_ */

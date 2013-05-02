@@ -11,7 +11,7 @@
 #include "defs.hpp"
 
 namespace io {
-	BOOL ImportAmoebaModel(std::string &fname, cAMOEBA_MODEL &model);
+	BOOL ImportAmoebaModel(const std::string &fname, cAMOEBA_MODEL &model);
 }
 
 #endif /* AMOEBA_IO_HPP_ */

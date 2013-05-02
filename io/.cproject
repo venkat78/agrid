@@ -29,6 +29,7 @@
 								<option id="gnu.cpp.compiler.lib.debug.option.debugging.level.1645524325" name="Debug Level" superClass="gnu.cpp.compiler.lib.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.953504532" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/surface_mesh}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/model}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/spatial_trees}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mesh_utils}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tmesh}&quot;"/>
