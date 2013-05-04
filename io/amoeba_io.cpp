@@ -87,7 +87,7 @@ namespace io
 			mesh->NewTriangle(facetNodes[i], facetNodes[i + 1], facetNodes[i + 2]);
 		}
 
-		ExportToOff<cAMOEBA_MODEL::cMESH>((char*) (pgInModel->GetName().c_str()), *mesh);
+		//ExportToOff<cAMOEBA_MODEL::cMESH>((char*) (pgInModel->GetName().c_str()), *mesh);
 	}
 
 	BOOL ReadAmoebaGroup(Group &g, cGROUP *pgInModel, cAMOEBA_MODEL &model) {
