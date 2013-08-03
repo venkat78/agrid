@@ -5,18 +5,18 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../grid.cpp \
-../grid_object_factory.cpp \
-../rectilinear_grid.cpp 
+../grid_cell.cpp \
+../grid_object_factory.cpp 
 
 OBJS += \
 ./grid.o \
-./grid_object_factory.o \
-./rectilinear_grid.o 
+./grid_cell.o \
+./grid_object_factory.o 
 
 CPP_DEPS += \
 ./grid.d \
-./grid_object_factory.d \
-./rectilinear_grid.d 
+./grid_cell.d \
+./grid_object_factory.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

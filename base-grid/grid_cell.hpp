@@ -12,7 +12,7 @@ namespace base_grid {
 template<typename _MESH_TYPE>
 class tGRID_CELL_ENTRY {
  public:
-  typename tMANIFOLD_RECORD<_MESH_TYPE> cMANIFOLD_RECORD;
+  typedef tMANIFOLD_RECORD<_MESH_TYPE> cMANIFOLD_RECORD;
 
  public:
   tGRID_CELL_ENTRY(cMANIFOLD_RECORD *record = NULL)
@@ -82,7 +82,7 @@ class tGRID_CELL {
   }
 
  public:
-  typedef std::vector<cGRID_CELL_ENTRY*>::iterator entry_iterator;
+  typedef typename std::vector<cGRID_CELL_ENTRY*>::iterator entry_iterator;
 
   entry_iterator begin() {
     return m_entries.begin();

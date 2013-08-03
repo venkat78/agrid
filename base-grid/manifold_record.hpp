@@ -10,21 +10,25 @@ namespace base_grid {
 template<typename _MESH_TYPE>
 class tMANIFOLD_RECORD {
  public:
+    typedef typename _MESH_TYPE::cMANIFOLD cMANIFOLD;
+ public:
   tMANIFOLD_RECORD()
       : m_mesh(NULL),
-        m_manifold(NULL) {
+        m_manifold(NULL),
+        m_index(-1) {
   }
 
-  tMANIFOLD_RECORD(_MESH_TYPE::cMANIFOLD *manifold, _MESH_TYPE *mesh)
+  tMANIFOLD_RECORD(cMANIFOLD *manifold, _MESH_TYPE *mesh)
       : m_mesh(mesh),
-        m_manifold(manifold) {
+        m_manifold(manifold),
+        m_index(-1) {
   }
 
   _MESH_TYPE* Mesh() {
     return m_mesh;
   }
 
-  _MESH_TYPE::cMANIFOLD* Manifold() {
+  cMANIFOLD* Manifold() {
     return m_manifold;
   }
 
@@ -36,9 +40,9 @@ class tMANIFOLD_RECORD {
     return m_index;
   }
 
-  BOOL IsOpen() const {
-    return m_manifold->IsOpen();
-  }
+//  BOOL IsOpen() const {
+//    return m_manifold->IsOpen();
+//  }
 
  private:
   /*
@@ -46,7 +50,7 @@ class tMANIFOLD_RECORD {
    * manifold
    */
   _MESH_TYPE *m_mesh;
-  _MESH_TYPE::cMANIFOLD *m_manifold;
+  cMANIFOLD *m_manifold;
   INT m_index;
 };
 

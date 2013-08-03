@@ -42,18 +42,6 @@ iCELL_INDEX tGRID<_GRID_ELT>::CellIndex(const cPOINT3 &point) {
   return iCELL_INDEX(index[0], index[1], index[2]);
 }
 
-template<typename _GRID_ELT>
-iCELL_INDEX tGRID<_GRID_ELT>::CellIndex(const cPOINT3 &point) {
-  UINT index[3];
-  DO_COORDS(coord)
-  {
-    REAL u = ((point[coord] - m_bounds.Min()[coord]) / m_cellSize[coord]);
-    index[coord] = (INT) u;
-  }
-
-  return iCELL_INDEX(index[0], index[1], index[2]);
-}
-
 //normal is used to resolve borderline cases
 template<typename _GRID_ELT>
 INT tGRID<_GRID_ELT>::ModifiedCellIndex(const cPOINT3 &point, cVECTOR3 normal,
