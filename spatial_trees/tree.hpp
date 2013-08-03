@@ -5,7 +5,7 @@
 
 namespace spatial_trees {
   /*
-   * Can be modified later to store bounding boxes in internal and 
+   * Can be modified later to store bounding boxes in internal and
    * leaf nodes.
    */
   template <typename GEOM_KERNEL,
@@ -26,7 +26,7 @@ namespace spatial_trees {
 
   public:
     tTREE(const cBOX &box = cBOX(), GEOM_MANAGER *mgr = NULL,
-	  INT height = 8, INT leafElementsLim = 50) : m_bounds(box), m_height(height), 
+	  INT height = 8, INT leafElementsLim = 50) : m_bounds(box), m_height(height),
 						      m_leafElementsLim(leafElementsLim),
 						      m_geomMgr(mgr)
     {
@@ -68,7 +68,7 @@ namespace spatial_trees {
     class cLEAF {
     public:
       typedef typename tLIST<ELEMENT_ID>::iterator element_iterator;
-      
+
       element_iterator begin() {
 	return m_elements.begin();
       }
@@ -97,11 +97,11 @@ namespace spatial_trees {
     template <typename GEOM_OBJECT>
     VOID Crosses(cINDEX index, const cBOX &bound,
 		 const GEOM_OBJECT &geomObj, std::vector<cLEAF*> &leaves) ;
-    
+
 
     template <typename GEOM_OBJECT>
     VOID Crosses(const GEOM_OBJECT &geomObj, std::vector<cLEAF*> &leaves) ;
-      
+
   public:
     /*
      * Methods that walk the tree.
@@ -110,7 +110,7 @@ namespace spatial_trees {
 		 std::vector<cLEAF*> &leaves) {
       Crosses<cPOINT>(point, leaves);
     }
-    
+
     VOID Crosses(const cBOX &box,
 		 std::vector<cLEAF*> &leaves) {
       Crosses<cBOX>(box, leaves);
@@ -125,7 +125,7 @@ namespace spatial_trees {
 		 std::vector<cLEAF*> &leaves) {
       Crosses<cLINE>(line, leaves);
     }
-    
+
     VOID Crosses(const cRAY &ray,
 		 std::vector<cLEAF*> &leaves) {
       Crosses<cRAY>(ray, leaves);
@@ -140,7 +140,7 @@ namespace spatial_trees {
 
   private:
     //Method to support construct the tree.
- 
+
     cINDEX FreeInternalNode();
     cINDEX FreeLeafNode();
     VOID ReturnFreeLeaf(cINDEX index);
@@ -154,18 +154,18 @@ namespace spatial_trees {
 
 
     //Method to support deletion of elements.
-    VOID Delete(cINDEX parentIndex, 
-		const cBOX &bound, 
-		const ELEMENT_ID &id);    
+    VOID Delete(cINDEX parentIndex,
+		const cBOX &bound,
+		const ELEMENT_ID &id);
   private:
     cBOX m_bounds;
     INT m_height;
     INT m_leafElementsLim;  //Max elements in a leaf.
     GEOM_MANAGER *m_geomMgr;
-    
+
     tLIST<INT> m_freeLeafNodes;
     tLIST<INT> m_freeNonLeafNodes;
-    
+
     tTABLE<cLEAF> m_leaves;
     tTABLE<cNON_LEAF_NODE> m_nonLeafNodes;
 
@@ -182,7 +182,7 @@ namespace spatial_trees {
 	ELEMENT_ID, N> 
 
   TREE_TMPL_DECL
-  typename TREE_TMPL_DEFN::cINDEX 
+  typename TREE_TMPL_DEFN::cINDEX
   TREE_TMPL_DEFN::FreeInternalNode()
   {
     cINDEX index;
@@ -202,12 +202,12 @@ namespace spatial_trees {
 
     index.m_id = freeIndex;
     index.m_isLeaf = false;
-  
+
     return index;
   }
 
   TREE_TMPL_DECL
-  typename TREE_TMPL_DEFN::cINDEX 
+  typename TREE_TMPL_DEFN::cINDEX
   TREE_TMPL_DEFN::FreeLeafNode()
   {
     cINDEX index;
@@ -222,9 +222,9 @@ namespace spatial_trees {
     INT freeIndex = m_freeLeafNodes.front();
     cLEAF *newNode = m_leaves.object_at(freeIndex);
     ::new (newNode)cLEAF();
-  
+
     m_freeLeafNodes.pop_front();
-  
+
     index.m_id = freeIndex;
     index.m_isLeaf = true;
 
@@ -245,7 +245,7 @@ namespace spatial_trees {
   {
     cNON_LEAF_NODE *nonLeaf = m_nonLeafNodes.object_at(index.m_id);
     nonLeaf->~cNON_LEAF_NODE();
-  
+
     m_freeNonLeafNodes.push_front(index.m_id);
   }
 
@@ -273,7 +273,7 @@ namespace spatial_trees {
   }
 
   TREE_TMPL_DECL
-  VOID TREE_TMPL_DEFN::Delete(cINDEX parentIndex, 
+  VOID TREE_TMPL_DEFN::Delete(cINDEX parentIndex,
 			      const cBOX &bound,
 			      const ELEMENT_ID &id)
   {
@@ -282,13 +282,13 @@ namespace spatial_trees {
 
     BOOL partitionSet[N];
     cBOX partitionBound[N];
-    
+
     for(INT i = 0; i < N ; i++ )
       partitionSet[i] = false;
-    
+
 
     m_geomMgr->Contains(id, bound, partitionSet);
-    
+
     for(INT i = 0; i < N ; i++) {
       if(partitionSet[i]) {
 	cINDEX index = m_nonLeafNodes.object_at(parentIndex.m_id)->m_children[i];
@@ -304,7 +304,7 @@ namespace spatial_trees {
       }
     }
   }
-  
+
 
   TREE_TMPL_DECL
   VOID TREE_TMPL_DEFN::AddNewLeaf(cINDEX parentIndex,
@@ -312,7 +312,7 @@ namespace spatial_trees {
 				  const ELEMENT_ID &id)
   {
     cINDEX leafIndex = FreeLeafNode();
-  
+
     cLEAF *leaf = m_leaves.object_at(leafIndex.m_id);
     leaf->Elements().push_back(id);
     m_nonLeafNodes.object_at(parentIndex.m_id)->m_children[partition] = leafIndex;
@@ -329,21 +329,21 @@ namespace spatial_trees {
 
     for(INT i = 0; i < N ; i++)
       partitionSet[i] = false;
-  
+
     ASSERT(height <= m_height - 2);
-  
+
     m_geomMgr->Contains(id, bound, partitionSet);
 
     for(INT i = 0;i < N; i++) {
       if(partitionSet[i])
 	partitionBound[i] = m_geomMgr->PartitionBound(bound, i);
     }
-  
+
     if(height == m_height - 2) {
       for(INT i = 0; i < N; i++ ) {
-	if(partitionSet[i]) { 
+	if(partitionSet[i]) {
 	  cINDEX index = m_nonLeafNodes.object_at(parentIndex.m_id)->m_children[i];
-	
+
 	  if(!index.IsValid())
 	    AddNewLeaf(parentIndex, i, id);
 	  else {
@@ -353,13 +353,13 @@ namespace spatial_trees {
 	  }
 	}
       }
-    
+
       return;
     }
-  
-  
+
+
     for(INT i = 0; i < N; i++ ) {
-      if(partitionSet[i]) { 
+      if(partitionSet[i]) {
 	cINDEX index = m_nonLeafNodes.object_at(parentIndex.m_id)->m_children[i];
 	if(!index.IsValid())
 	  AddNewLeaf(parentIndex, i, id);
@@ -381,34 +381,34 @@ namespace spatial_trees {
   {
     ASSERT(height <= m_height);
 
-    //Depth of tree gets priority 
+    //Depth of tree gets priority
     if(height == m_height - 1) {
       cLEAF *leaf = m_leaves.object_at(leafIndex.m_id);
       leaf->Elements().push_back(id);
       return;
     }
-  
+
     cLEAF *leaf = m_leaves.object_at(leafIndex.m_id);
     if(leaf->Elements().size() <  m_leafElementsLim) {
       leaf->Elements().push_back(id);
       return;
     }
-  
+
     tLIST<ELEMENT_ID> copiedList(leaf->Elements());
     copiedList.push_back(id);
 
     //bumping the tree down.
     cINDEX newInternalNodeIndex = FreeInternalNode();
     m_nonLeafNodes.object_at(parentIndex.m_id)->m_children[partition] = newInternalNodeIndex;
-  
+
     ReturnFreeLeaf(leafIndex);
 
     typename tLIST<ELEMENT_ID>::iterator firstElement = copiedList.begin();
     typename tLIST<ELEMENT_ID>::iterator lastElement = copiedList.end();
-  
+
     for( ; firstElement != lastElement ; firstElement++)
       InsertIntoNonLeafNode(newInternalNodeIndex, box, *firstElement, height);
-  
+
   }
 
   TREE_TMPL_DECL
@@ -416,7 +416,7 @@ namespace spatial_trees {
   VOID TREE_TMPL_DEFN::Crosses(cINDEX index,
 			       const cBOX &bound,
 			       const GEOM_OBJECT &geomObj,
-			       std::vector<cLEAF*> &leaves) 
+			       std::vector<cLEAF*> &leaves)
   {
     if(!index.IsValid())
       return;
@@ -443,11 +443,11 @@ namespace spatial_trees {
       }
     }
   }
-  
+
   TREE_TMPL_DECL
   template <typename GEOM_OBJECT>
   VOID TREE_TMPL_DEFN::Crosses(const GEOM_OBJECT &geomObj,
-			       std::vector<cLEAF*> &leaves) 
+			       std::vector<cLEAF*> &leaves)
   {
     Crosses(m_root, m_bounds, geomObj, leaves);
   }

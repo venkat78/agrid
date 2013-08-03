@@ -2,68 +2,40 @@
 #define _BASE_GRID_GRID_OBJECT_FACTORY_HPP_
 
 #include "defs.hpp"
-//#include "cell.hpp"
+#include <unordered_map>
 
-namespace agrid_boolean {
+namespace base_grid {
+template<typename _ELT_TYPE>
+class tGRID_OBJECT_FACTORY {
+  typedef std::unordered_map<sINDEX, _ELT_TYPE*> cMAP;
+ public:
+  _ELT_TYPE* GetElement(INT index) {
+    return m_elements.object_at(index);
+  }
 
-  class cGRID_OBJECT_FACTORY {
-  public:
-    cGRID_OBJECT_FACTORY() { }
+  /*
+   * Elements for coarse map.
+   */
+  _ELT_TYPE* GetElement(sINDEX index) {
+    typename cMAP::iterator itr = m_coarseMap.find(index);
+    if (itr == m_coarseMap.end())
+      return NULL;
 
-    //    INT NumVertices() const { return m_vertices.size(); }
+    return m_elements.object_at(itr->second);
+  }
 
-//    INT NumGrayCells() const { return m_grayCells.size(); }
-//
-//    //    INT NumWhiteCells() const { return m_whiteCells.size(); }
-//
-//    /*
-//     * Methods to add cells.
-//     */
-//    //    cWHITE_CELL *AddWhiteCell(iCELL_INDEX cellIndex);
-//    cGRAY_CELL *AddGrayCell(iCELL_INDEX cellIndex);
-//
-////     /*
-////      * Methods to add grid vertices.
-////      */
-////     cGRID_VERTEX* AddGridVertex(iGRID_VERTEX vertexIndex);
-//
-////     /*
-////      * Methods to access cells and grid vertices.
-////      */
-////     cWHITE_CELL *WhiteCell(iCELL_INDEX cellIndex);
-//
-//    cGRAY_CELL *GrayCell(iCELL_INDEX cellIndex);
-//
-//    //    cGRID_VERTEX* GridVertex(iGRID_VERTEX vertexIndex);
-//
-//    //Release all storage.
-//    VOID Destroy();
-//
-//  public:
-//    typedef tTABLE<cGRAY_CELL>::iterator gray_cells_iterator;
-//
-//    gray_cells_iterator GrayCellsBegin() {
-//      return m_grayCells.begin();
-//    }
-//
-//    gray_cells_iterator GrayCellsEnd() {
-//      return m_grayCells.end();
-//    }
-//
-//  private:
-//    /*
-//     * Table of gray cells.
-//     */
-//    tTABLE<cGRAY_CELL> m_grayCells;
-//
-//    /*
-//     * Only white cells adjacent to gray cells are stored.
-//     */
-//    //    tTABLE<cWHITE_CELL> m_whiteCells;
-//
-//    cINDEX_TO_INT_MAP m_grayCellsMap;
-  };
+  _ELT_TYPE* NewElement(sINDEX index) {
+    _ELT_TYPE *newElement = m_elements.new_object();
+    INT localIndex = m_elements.size() - 1;
+    m_coarseMap[index] = localIndex;
+    newElement->Index(localIndex);
+    return newElement;
+  }
 
+ private:
+  std::unordered_map<sINDEX, _ELT_TYPE*> m_coarseMap;
+  tTABLE<_ELT_TYPE> m_elements;
+};
 
 }
 
