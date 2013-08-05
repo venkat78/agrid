@@ -4,16 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../base_grid.cpp \
 ../grid.cpp \
 ../grid_cell.cpp \
 ../grid_object_factory.cpp 
 
 OBJS += \
+./base_grid.o \
 ./grid.o \
 ./grid_cell.o \
 ./grid_object_factory.o 
 
 CPP_DEPS += \
+./base_grid.d \
 ./grid.d \
 ./grid_cell.d \
 ./grid_object_factory.d 

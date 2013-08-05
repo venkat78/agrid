@@ -1,5 +1,5 @@
-#ifndef _GRID_GEN_DEFS_HPP_
-#define _GRID_GEN_DEFS_HPP_
+#ifndef _AMOEBA_GRID_GEN_DEFS_HPP_
+#define _AMOEBA_GRID_GEN_DEFS_HPP_
 
 #include <list>
 #include <map>
@@ -26,6 +26,9 @@ using namespace model;
 
 #include "grid.hpp"
 using namespace base_grid;
+
+#include "grid_gen.hpp"
+using namespace grid_gen;
 
 //#include "agrid_mesh.hpp"
 

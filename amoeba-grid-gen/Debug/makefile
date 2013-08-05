@@ -37,19 +37,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: test
+all: amoeba-grid-gen
 
 # Tool invocations
-test: $(OBJS) $(USER_OBJS)
+amoeba-grid-gen: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L"/home/venkat/git/agrid/io/Debug" -L"/home/venkat/git/agrid/model/Debug" -L"/home/venkat/git/agrid/agrid-mesh/Debug" -L"/home/venkat/git/agrid/agrid-boolean/Debug" -L"/home/venkat/git/agrid/surface_mesh/Debug" -L"/home/venkat/git/agrid/mesh_utils/Debug" -L"/home/venkat/git/agrid/tmesh/Debug" -L"/home/venkat/git/agrid/spatial_trees/Debug" -L"/home/venkat/git/agrid/geom/Debug" -L"/home/venkat/git/agrid/utils/Debug" -o"test" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++  -o "amoeba-grid-gen" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) test
+	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) amoeba-grid-gen
 	-@echo ' '
 
 .PHONY: all clean dependents

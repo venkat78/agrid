@@ -39,7 +39,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/spatial_trees}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/surface_mesh}&quot;"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.include.files.1334745079" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" valueType="includeFiles"/>
+								<option id="gnu.cpp.compiler.option.include.files.1334745079" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files"/>
+								<option id="gnu.cpp.compiler.option.other.other.18282590" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.669350950" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1120117438" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug">

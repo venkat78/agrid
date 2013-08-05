@@ -3,6 +3,7 @@
 
 #include "defs.hpp"
 #include "grid_object_factory.hpp"
+#include "grid_cell.hpp"
 
 namespace base_grid {
 

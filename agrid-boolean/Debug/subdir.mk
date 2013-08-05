@@ -50,7 +50,7 @@ CPP_DEPS += \
 %.o: ../%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I"/home/Bujji/git/agrid/surface_mesh" -I"/home/Bujji/git/agrid/model" -I"/home/Bujji/git/agrid/spatial_trees" -I"/home/Bujji/git/agrid/agrid-mesh" -I"/home/Bujji/git/agrid/mesh_utils" -I"/home/Bujji/git/agrid/tmesh" -I"/home/Bujji/git/agrid/geom" -I"/home/Bujji/git/agrid/io" -I"/home/Bujji/git/agrid/utils" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I"/home/venkat/git/agrid/surface_mesh" -I"/home/venkat/git/agrid/model" -I"/home/venkat/git/agrid/spatial_trees" -I"/home/venkat/git/agrid/agrid-mesh" -I"/home/venkat/git/agrid/mesh_utils" -I"/home/venkat/git/agrid/tmesh" -I"/home/venkat/git/agrid/geom" -I"/home/venkat/git/agrid/io" -I"/home/venkat/git/agrid/utils" -O0 -g3 -Wall -c -fmessage-length=0 -std=c++0x -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
