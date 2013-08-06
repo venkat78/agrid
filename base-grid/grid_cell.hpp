@@ -1,5 +1,5 @@
 #ifndef _BASE_GRID_GRID_CELL_HPP_
-#define _BASE_GRID_GRID_CELLHPP_
+#define _BASE_GRID_GRID_CELL_HPP_
 
 #include "manifold_record.hpp"
 
@@ -78,7 +78,7 @@ class tGRID_CELL {
     typename cENTRIES::iterator lastEntry = m_entries.end();
 
     for (; currEntry != lastEntry; currEntry++)
-    delete currEntry.operator*();
+      delete currEntry.operator*();
   }
 
  public:
@@ -100,13 +100,20 @@ class tGRID_CELL {
   INT NumEntries() {
     return m_entries.size();
   }
+  VOID Index(INT index) {
+    m_index = index;
+  }
 
+  INT Index() {
+    return m_index;
+  }
  public:
 
  private:
   cGRID_CELL_ENTRY *Entry(cMANIFOLD_RECORD *record);
 
  private:
+  INT m_index;
   std::vector<cGRID_CELL_ENTRY*> m_entries;
 };
 

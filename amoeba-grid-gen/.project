@@ -3,6 +3,16 @@
 	<name>amoeba-grid-gen</name>
 	<comment></comment>
 	<projects>
+		<project>base-grid</project>
+		<project>geom</project>
+		<project>grid-gen</project>
+		<project>io</project>
+		<project>mesh_utils</project>
+		<project>model</project>
+		<project>spatial_trees</project>
+		<project>surface_mesh</project>
+		<project>tmesh</project>
+		<project>utils</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

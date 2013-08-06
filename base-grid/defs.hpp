@@ -10,6 +10,7 @@
 #include <list>
 #include <vector>
 #include <ext/hash_map>
+#include <unordered_map>
 
 #include <cstring>
 
@@ -22,6 +23,7 @@ using namespace geom;
 #include "tmesh.hpp"
 using namespace tmesh;
 
+namespace base_grid {
 enum eCELL_COLOR {
   UNKNOWN = -1,
   BLACK,
@@ -39,6 +41,10 @@ struct sINDEX {
         y(_y),
         z(_z),
         padding(65535) {
+  }
+
+  UINT64 operator()(const sINDEX &index) const {
+    return index.Value();
   }
 
   UINT64 Value() const {
@@ -63,7 +69,7 @@ typedef sINDEX iCELL_INDEX;
 typedef sINDEX iGRID_VERTEX;
 
 struct sINDEX_HASH_FCN {
-  UINT64 operator()(const sINDEX &i) const {
+  std::size_t operator()(const sINDEX &i) const {
     return i.Value();
   }
 };
@@ -81,5 +87,7 @@ typedef cGRID_CELL_COLORS cGRID_VERTEX_COLORS;
 
 typedef __gnu_cxx ::hash_map<sINDEX, BOOL, sINDEX_HASH_FCN> cGRID_CELL_MARKS;
 typedef __gnu_cxx ::hash_map<sINDEX, INT, sINDEX_HASH_FCN> cINDEX_TO_INT_MAP;
+//typedef std::unordered_map<sINDEX, INT, sINDEX_HASH_FCN> cINDEX_TO_INT_MAP;
 
+}  //namespace base_grid
 #endif /* DEFS_HPP_ */

@@ -2,12 +2,11 @@
 #define _BASE_GRID_GRID_OBJECT_FACTORY_HPP_
 
 #include "defs.hpp"
-#include <unordered_map>
 
 namespace base_grid {
 template<typename _ELT_TYPE>
 class tGRID_OBJECT_FACTORY {
-  typedef std::unordered_map<sINDEX, _ELT_TYPE*> cMAP;
+  typedef __gnu_cxx::hash_map<sINDEX, _ELT_TYPE*, sINDEX_HASH_FCN> cMAP;
  public:
   _ELT_TYPE* GetElement(INT index) {
     return m_elements.object_at(index);
@@ -16,24 +15,24 @@ class tGRID_OBJECT_FACTORY {
   /*
    * Elements for coarse map.
    */
-  _ELT_TYPE* GetElement(sINDEX index) {
+  _ELT_TYPE* CoarseElement(sINDEX index) {
     typename cMAP::iterator itr = m_coarseMap.find(index);
     if (itr == m_coarseMap.end())
       return NULL;
 
-    return m_elements.object_at(itr->second);
+    return itr->second;
   }
 
   _ELT_TYPE* NewElement(sINDEX index) {
     _ELT_TYPE *newElement = m_elements.new_object();
     INT localIndex = m_elements.size() - 1;
-    m_coarseMap[index] = localIndex;
+    m_coarseMap[index] = newElement;
     newElement->Index(localIndex);
     return newElement;
   }
 
  private:
-  std::unordered_map<sINDEX, _ELT_TYPE*> m_coarseMap;
+  cMAP m_coarseMap;
   tTABLE<_ELT_TYPE> m_elements;
 };
 

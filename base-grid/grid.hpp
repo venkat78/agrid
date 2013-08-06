@@ -28,7 +28,7 @@ class tGRID {
   }
 
   _GRID_ELT *CoarseElement(sINDEX index) {
-    return m_factory.GetElement(index);
+    return m_factory.CoarseElement(index);
   }
 
   _GRID_ELT* AddCoarseElement(sINDEX index) {
