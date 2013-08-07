@@ -51,6 +51,33 @@ class tGRID {
 
   REAL CellLowerBound(REAL val, eCOORD coord);
 
+  /*
+   * Cell length related methods.
+   */
+  REAL CellLength(INT i) {
+    return m_cellSize[i];
+  }
+  REAL CellLengthX() {
+    return m_cellSize[0];
+  }
+  REAL CellLengthY() {
+    return m_cellSize[1];
+  }
+  REAL CellLengthZ() {
+    return m_cellSize[2];
+  }
+  REAL CellLengthMin() {
+    REAL min01 = (
+        (m_cellSize[0] < m_cellSize[1]) ? m_cellSize[0] : m_cellSize[1]);
+    return ((min01 < m_cellSize[2]) ? min01 : m_cellSize[2]);
+  }
+
+  REAL CellLengthMax() {
+    REAL max01 = (
+        (m_cellSize[0] > m_cellSize[1]) ? m_cellSize[0] : m_cellSize[1]);
+    return ((max01 > m_cellSize[2]) ? max01 : m_cellSize[2]);
+  }
+
  private:
   tGRID_OBJECT_FACTORY<_GRID_ELT> m_factory;
   INT m_numCells[3];

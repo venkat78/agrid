@@ -11,5 +11,3 @@
 #include "grid_generator.cpp"
 
 template class tGRID_GENERATOR<cAMOEBA_MODEL> ;
-
-int i = 0;

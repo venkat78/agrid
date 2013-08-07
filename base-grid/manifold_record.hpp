@@ -10,7 +10,7 @@ namespace base_grid {
 template<typename _MESH_TYPE>
 class tMANIFOLD_RECORD {
  public:
-    typedef typename _MESH_TYPE::cMANIFOLD cMANIFOLD;
+  typedef typename _MESH_TYPE::cMANIFOLD cMANIFOLD;
  public:
   tMANIFOLD_RECORD()
       : m_mesh(NULL),

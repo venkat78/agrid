@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lgeom
+LIBS := -lhdf5 -lhdf5_cpp -lbase-grid -lmodel -lio -lmesh_utils -lmesh -ltmesh -lspatial_trees -lgeom -lutils
 
