@@ -19,7 +19,7 @@ template<typename _MODEL_TYPE>
 VOID tGRID_GENERATOR<_MODEL_TYPE>::Register(cMESH *mesh) {
   Slice(mesh);
 
-  INT numManifoldRecordsOld = m_manifolds.size();
+  INT offset = m_manifolds.size();
 
   //Create record for each manifold.
   typename cMESH::manifold_iterator currManifold = mesh->ManifoldsBegin();
@@ -29,13 +29,11 @@ VOID tGRID_GENERATOR<_MODEL_TYPE>::Register(cMESH *mesh) {
     RegisterManifold(currManifold.operator->(), mesh);
   }
 
-  INT numManifoldRecordsNew = m_manifolds.size();
-
   /*
    * Method colors the global grid and individual grid for
    * each manifold.
    */
-//  PaintCurrManifoldGrids(mesh, numManifoldRecordsOld);
+  RegisterFacetsInGrids(mesh, offset);
 }
 
 template<typename _MODEL_TYPE>
@@ -85,9 +83,30 @@ VOID tGRID_GENERATOR<_MODEL_TYPE>::Slice(cMESH *mesh) {
 template<typename _MODEL_TYPE>
 VOID tGRID_GENERATOR<_MODEL_TYPE>::RegisterManifold(cMANIFOLD *manifold,
                                                     cMESH *mesh) {
-  cMANIFOLD_RECORD *record = m_manifolds.new_object();
-  ::new (record) cMANIFOLD_RECORD(manifold, mesh);
+  cMANIFOLD_OBJ *record = m_manifolds.new_object();
+  ::new (record) cMANIFOLD_OBJ(m_bounds, m_numCells, manifold, mesh);
   record->Index(m_manifolds.size() - 1);
+}
+
+template<typename _MODEL_TYPE>
+VOID tGRID_GENERATOR<_MODEL_TYPE>::RegisterFacetsInGrids(cMESH *mesh,
+                                                         INT offset) {
+  typename cMESH::facet_iterator currFacet = mesh->FacetsBegin();
+  typename cMESH::facet_iterator lastFacet = mesh->FacetsEnd();
+
+  for (; currFacet != lastFacet; currFacet++) {
+    iCELL_INDEX cellIndices[2];
+    INT numCells = m_grid.ModifiedCellIndex(currFacet->MeanPoint(),
+                                            currFacet->Normal(), cellIndices);
+
+    for (INT i = 0; i < numCells; i++) {
+      //Add facet and manifold to gray-cell entry.
+      iMANIFOLD manifoldIndex = currFacet->ManifoldIndex();
+      cMANIFOLD_OBJ *record = m_manifolds.object_at(offset + manifoldIndex);
+      cGRID_CELL *globalCell = m_grid.CoarseElement(cellIndices[i]);
+      globalCell->Register(record, currFacet->Index());
+    }
+  }
 
 }
 

@@ -17,11 +17,13 @@ tGRID_CELL<_MESH_TYPE>::Entry(cMANIFOLD_RECORD *record) {
   m_entries.push_back(newEntry);
   return newEntry;
 }
+
 template<typename _MESH_TYPE>
 VOID tGRID_CELL<_MESH_TYPE>::Register(cMANIFOLD_RECORD *record,
                                       iFACET facetIndex) {
   cGRID_CELL_ENTRY *entry = Entry(record);
   entry->Register(facetIndex);
+  m_color = GRAY;
 }
 
 }

@@ -14,7 +14,7 @@ class tGRID {
    * Constructors.
    */
   tGRID() {
-    m_numCells[0] = m_numCells[1] = m_numCells[2];
+    m_numCells[0] = m_numCells[1] = m_numCells[2] = 0;
   }
 
   tGRID(const cBOX3 &bounds, INT numCells[3]);

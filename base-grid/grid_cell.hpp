@@ -70,7 +70,9 @@ class tGRID_CELL {
   typedef std::vector<cGRID_CELL_ENTRY*> cENTRIES;
  public:
   //
-  tGRID_CELL() {
+  tGRID_CELL()
+      : m_color(UNKNOWN),
+        m_index(-1) {
   }
 
   ~tGRID_CELL() {
@@ -115,6 +117,7 @@ class tGRID_CELL {
  private:
   INT m_index;
   std::vector<cGRID_CELL_ENTRY*> m_entries;
+  eCELL_COLOR m_color;
 };
 
 }
