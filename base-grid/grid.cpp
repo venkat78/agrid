@@ -108,5 +108,196 @@ REAL tGRID<_GRID_ELT>::CellLowerBound(REAL val, eCOORD coord) {
   return m_bounds.MinCoord(coord) + (index * h);
 }
 
+template<typename _GRID_ELT>
+eCELL_COLOR tGRID<_GRID_ELT>::CellColor(iCELL_INDEX index) {
+  cGRID_CELL_COLORS::iterator pos = m_cellColors.find(index);
+
+  if (pos == m_cellColors.end())
+    return UNKNOWN;
+
+  return pos->second;
+}
+
+template<typename _GRID_ELT>
+eCELL_COLOR tGRID<_GRID_ELT>::VertexColor(iGRID_VERTEX index) {
+  cGRID_VERTEX_COLORS::iterator pos = m_vertexColors.find(index);
+
+  if (pos == m_vertexColors.end())
+    return UNKNOWN;
+
+  return pos->second;
+}
+
+template<typename _GRID_ELT>
+VOID tGRID<_GRID_ELT>::CollectWhiteVertices() {
+  cGRID_CELL_COLORS::iterator currPos = m_cellColors.begin();
+  cGRID_CELL_COLORS::iterator lastPos = m_cellColors.end();
+
+  for (; currPos != lastPos; currPos++) {
+    if (currPos->second == WHITE) {
+      iCELL_INDEX cellIndex = currPos->first;
+
+      for (INT i = 0; i < 2; i++) {
+        for (INT j = 0; j < 2; j++) {
+          for (INT k = 0; k < 2; k++) {
+            iGRID_VERTEX vIndex(cellIndex.x + i, cellIndex.y + j,
+                                cellIndex.z + k);
+            m_vertexColors[vIndex] = WHITE;
+          }
+        }
+      }
+    }
+  }
+}
+
+template<typename _GRID_ELT>
+VOID tGRID<_GRID_ELT>::AddToFront(eCELL_COLOR sourceCellColor,
+                                  iCELL_INDEX index,
+                                  std::vector<iCELL_INDEX> &front,
+                                  cGRID_CELL_MARKS &alreadyVisited) {
+  if (!IsValid(index))
+    return;
+
+  cGRID_CELL_COLORS::iterator indexColor = m_cellColors.find(index);
+  if (sourceCellColor == GRAY) {
+    if (indexColor != m_cellColors.end() && indexColor->second == GRAY) {
+      cGRID_CELL_MARKS::iterator pos = alreadyVisited.find(index);
+
+      if (pos == alreadyVisited.end()) {
+        alreadyVisited[index] = true;
+        front.push_back(index);
+      }
+
+      return;
+    }
+  } else {
+    cGRID_CELL_MARKS::iterator pos = alreadyVisited.find(index);
+    if (pos == alreadyVisited.end()) {
+      alreadyVisited[index] = true;
+      front.push_back(index);
+
+      if (indexColor == m_cellColors.end())
+        CellColor(index, WHITE);
+    }
+  }
+}
+
+template<typename _GRID_ELT>
+VOID tGRID<_GRID_ELT>::AdvancingFront(std::vector<iCELL_INDEX> &front,
+                                      cGRID_CELL_MARKS &alreadyVisited) {
+  //Z-min, max cells.
+  INT i = 0, j = 0;
+  for (; i < NumCells(GEOM_X); i++) {
+    for (; j < NumCells(GEOM_Y); j++) {
+      AddToFront(WHITE, iCELL_INDEX(i, j, 0), front, alreadyVisited);
+      AddToFront(WHITE, iCELL_INDEX(i, j, NumCells(GEOM_Z) - 1), front,
+                 alreadyVisited);
+    }
+  }
+
+  //Y-min, max cells.
+  i = 0, j = 0;
+  for (; i < NumCells(GEOM_X); i++) {
+    for (; j < NumCells(GEOM_Z); j++) {
+      AddToFront(WHITE, iCELL_INDEX(i, 0, j), front, alreadyVisited);
+      AddToFront(WHITE, iCELL_INDEX(i, NumCells(GEOM_Y) - 1, j), front,
+                 alreadyVisited);
+    }
+  }
+
+  //X-min, max cells
+  i = 0, j = 0;
+  for (; i < NumCells(GEOM_Y); i++) {
+    for (; j < NumCells(GEOM_Z); j++) {
+      AddToFront(WHITE, iCELL_INDEX(0, i, j), front, alreadyVisited);
+      AddToFront(WHITE, iCELL_INDEX(NumCells(GEOM_X) - 1, i, j), front,
+                 alreadyVisited);
+    }
+  }
+}
+
+template<typename _GRID_ELT>
+VOID tGRID<_GRID_ELT>::MarkBlackCells(cGRID_CELL_MARKS &visitedCells) {
+  for (INT i = 0; i < m_numCells[0]; i++) {
+    for (INT j = 0; j < m_numCells[1]; j++) {
+      for (INT k = 0; k < m_numCells[2]; k++) {
+        iCELL_INDEX index(i, j, k);
+        cGRID_CELL_MARKS::iterator pos = visitedCells.find(
+            iCELL_INDEX(i, j, k));
+        if (pos == visitedCells.end()) {
+          CellColor(index, BLACK);
+        }
+      }
+    }
+  }
+}
+
+template<typename _GRID_ELT>
+VOID tGRID<_GRID_ELT>::FlipColors()
+{
+  typename cGRID_CELL_COLORS::iterator curr = m_cellColors.begin();
+  typename cGRID_CELL_COLORS::iterator last = m_cellColors.end();
+
+  for( ; curr != last ; curr++) {
+      if(curr->second == BLACK) {
+        m_cellColors[curr->first] = WHITE;
+      }
+      else if(curr->second == WHITE) {
+        m_cellColors[curr->first] = BLACK;
+      }
+  }
+}
+
+VOID CoarseNeighbors(sINDEX index, sINDEX neighbors[6]) {
+  neighbors[0] = iCELL_INDEX(index.x - 1, index.y, index.z);
+  neighbors[1] = iCELL_INDEX(index.x + 1, index.y, index.z);
+  neighbors[2] = iCELL_INDEX(index.x, index.y - 1, index.z);
+  neighbors[3] = iCELL_INDEX(index.x, index.y + 1, index.z);
+  neighbors[4] = iCELL_INDEX(index.x, index.y, index.z - 1);
+  neighbors[5] = iCELL_INDEX(index.x, index.y, index.z + 1);
+}
+/*
+ *  1. Before calling this method all gray cells need to be marked.
+ *  2. The outer layer of cells are assumed to be WHITE.
+ *  3. Keep walking until all white cells are visited.
+ */
+template<typename _GRID_ELT>
+VOID tGRID<_GRID_ELT>::FloodFill() {
+  std::vector<iCELL_INDEX> front;
+  cGRID_CELL_MARKS alreadyVisited;
+
+  AdvancingFront(front, alreadyVisited);
+
+  INT oldFrontSize, newFrontSize;
+  oldFrontSize = newFrontSize = front.size();
+
+  do {
+    INT i = 0;
+    oldFrontSize = front.size();
+    while (i < oldFrontSize) {
+      iCELL_INDEX cellIndex = front[i];
+      cGRID_CELL_COLORS::iterator cellColorItr = m_cellColors.find(cellIndex);
+      eCELL_COLOR cellColor =
+          cellColorItr != m_cellColors.end() ? cellColorItr->second : UNKNOWN;
+
+      sINDEX neighbors[6];
+      CoarseNeighbors(cellIndex, neighbors);
+
+      for (INT j = 0; j < 6; j++)
+        AddToFront(cellColor, neighbors[j], front, alreadyVisited);
+
+      i++;
+    }
+
+    newFrontSize = front.size();
+
+  } while (newFrontSize > oldFrontSize);
+
+  MarkBlackCells(alreadyVisited);
+  FlipColors();
+
+//  CollectWhiteVertices();
+}
+
 }
 

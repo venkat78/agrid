@@ -25,7 +25,7 @@ class tMANIFOLD_OBJ : public tMANIFOLD_RECORD<_MESH_TYPE> {
   }
 
   _GRID_TYPE *Grid() {
-    return m_grid;
+    return &m_grid;
   }
 
  private:

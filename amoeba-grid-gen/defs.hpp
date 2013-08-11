@@ -30,8 +30,4 @@ using namespace base_grid;
 #include "grid_gen.hpp"
 using namespace grid_gen;
 
-//#include "agrid_mesh.hpp"
-
-//#undef ASSERT
-
 #endif //_GRID_GEN_DEFS_HPP_

@@ -103,8 +103,15 @@ VOID tGRID_GENERATOR<_MODEL_TYPE>::RegisterFacetsInGrids(cMESH *mesh,
       //Add facet and manifold to gray-cell entry.
       iMANIFOLD manifoldIndex = currFacet->ManifoldIndex();
       cMANIFOLD_OBJ *record = m_manifolds.object_at(offset + manifoldIndex);
+
+      //Registering facets in local and global grids.
       cGRID_CELL *globalCell = m_grid.CoarseElement(cellIndices[i]);
       globalCell->Register(record, currFacet->Index());
+      m_grid.CellColor(cellIndices[i], GRAY);
+
+      cGRID_CELL *localCell = record->Grid()->CoarseElement(cellIndices[i]);
+      localCell->Register(record, currFacet->Index());
+      record->Grid()->CellColor(cellIndices[i], GRAY);
     }
   }
 

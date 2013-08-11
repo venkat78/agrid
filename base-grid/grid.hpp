@@ -51,6 +51,52 @@ class tGRID {
 
   REAL CellLowerBound(REAL val, eCOORD coord);
 
+  INT NumCells(INT i) {
+    return m_numCells[i];
+  }
+
+  INT NumCells() {
+    return m_numCells[0] * m_numCells[1] * m_numCells[2];
+  }
+
+  /*
+   * Vertex related methods
+   */
+  INT NumVertices() {
+    return (m_numCells[0] + 1) * (m_numCells[1] + 1) * (m_numCells[2] + 1);
+  }
+
+  cPOINT3 VertexPoint(INT indices[3]) {
+    cPOINT3 &min = m_bounds.Min();
+
+    return cPOINT3(min[0] + (indices[0] * m_cellSize[0]),
+                   min[1] + (indices[1] * m_cellSize[1]),
+                   min[2] + (indices[2] * m_cellSize[2]));
+  }
+
+  cPOINT3 VertexPoint(iGRID_VERTEX index) {
+    INT indices[3];
+    indices[0] = index.x;
+    indices[1] = index.y;
+    indices[2] = index.z;
+    return VertexPoint(indices);
+  }
+
+  VOID VertexIndex(const cPOINT3 &point, INT indices[3]) {
+    cPOINT3 &min = m_bounds.Min();
+
+    for (INT i = 0; i < 3; i++) {
+      indices[i] = (INT) ((point[i] - min[i]) / m_cellSize[i]);
+    }
+  }
+
+  //Assumes point is a grid vertex.
+  iGRID_VERTEX VertexIndex(const cPOINT3 &point) {
+    INT indices[3];
+    VertexIndex(point, indices);
+    return iGRID_VERTEX(indices[0], indices[1], indices[2]);
+  }
+
   /*
    * Cell length related methods.
    */
@@ -78,12 +124,48 @@ class tGRID {
     return ((max01 > m_cellSize[2]) ? max01 : m_cellSize[2]);
   }
 
+  VOID CellColor(iCELL_INDEX index, eCELL_COLOR color) {
+    m_cellColors[index] = color;
+  }
+
+  eCELL_COLOR CellColor(iCELL_INDEX index);
+
+  eCELL_COLOR VertexColor(iGRID_VERTEX index);
+ public:
+  //Methods related to walking.
+  VOID FloodFill();
+
+  VOID ClearColorMarkers() {
+    m_cellColors.clear();
+    m_vertexColors.clear();
+  }
+
+ private:
+  VOID CollectWhiteVertices();
+  VOID AdvancingFront(std::vector<iCELL_INDEX> &, cGRID_CELL_MARKS &);
+  VOID AddToFront(eCELL_COLOR, iCELL_INDEX, std::vector<iCELL_INDEX> &,
+                  cGRID_CELL_MARKS &);
+  VOID MarkBlackCells(cGRID_CELL_MARKS &visitedCells);
+  VOID FlipColors();
+  BOOL IsValid(iCELL_INDEX index) {
+    return ((0 <= index.x && index.x < m_numCells[0])
+        && (0 <= index.y && index.y < m_numCells[1])
+        && (0 <= index.z && index.z < m_numCells[2]));
+  }
+
  private:
   tGRID_OBJECT_FACTORY<_GRID_ELT> m_factory;
   INT m_numCells[3];
   REAL m_cellSize[3];
 
   cBOX3 m_bounds;
+
+  //First gray cells should always be marked.
+  //Then white cells will be marked.
+  cGRID_CELL_COLORS m_cellColors;
+
+  //This is to hold colors of white vertices.
+  cGRID_VERTEX_COLORS m_vertexColors;
 
 };
 }
