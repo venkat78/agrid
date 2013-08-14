@@ -31,13 +31,13 @@ struct sFACE_CELL_PAIR_CMP {
 };
 
 template <typename _Face_Type>
-class tGRID_CELL
+class tVOL_GRID_CELL
 {
 public:
-  tGRID_CELL() : m_index(INVALID_ICELL)
+  tVOL_GRID_CELL() : m_index(INVALID_ICELL)
   {}
 
-  ~tGRID_CELL()
+  ~tVOL_GRID_CELL()
   {}
 
   VOID AppendFace(_Face_Type* face) {
@@ -150,7 +150,7 @@ public:
   typedef tVOLUME_GRID_FACE<_Mesh_Entities> cSELF;
 
   _TMESH_TOPO_TYPES(_Mesh_Entities);
-  typedef tGRID_CELL<cFACET> cCELL;
+  typedef tVOL_GRID_CELL<cFACET> cCELL;
 public:
   tVOLUME_GRID_FACE() : cBASE(),
 			m_isFromInputSurface(false)
@@ -259,7 +259,7 @@ class tVOLUME_GRID_OBJECT_FACTORY : public tMESH_OBJECT_FACTORY< _Mesh_Entities,
 
 public:
   _TOBJECT_FACTORY_ENTITIES(_Mesh_Entities);
-  typedef tGRID_CELL<cFACET> cCELL;
+  typedef tVOL_GRID_CELL<cFACET> cCELL;
 
   typedef typename tTABLE<cCELL>::iterator cell_iterator;
 public:
@@ -314,7 +314,7 @@ class tVOLUMETRIC_GRID : public tMESH < _Mesh_Entities,	_Storage_Policy, _Object
 	    typedef tVOLUMETRIC_GRID< _Mesh_Entities, _Storage_Policy, _Object_Factory > cSELF;
 
 	    _TMESH_ENTITIES(cBASE);
-	    typedef tGRID_CELL<cFACET> cCELL;
+	    typedef tVOL_GRID_CELL<cFACET> cCELL;
 	    typedef typename _Object_Factory<_Mesh_Entities, _Storage_Policy>::cell_iterator cell_iterator;
 	  public:
 	    tVOLUMETRIC_GRID(const cBOX3 &simVol = cBOX3()) : cBASE(),

@@ -27,7 +27,7 @@ using namespace model;
 #include "grid.hpp"
 using namespace base_grid;
 
-//#include "agrid_mesh.hpp"
+#include "agrid_mesh.hpp"
 
 //#undef ASSERT
 

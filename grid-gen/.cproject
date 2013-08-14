@@ -32,6 +32,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/utils}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/model}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/io}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/agrid-mesh}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mesh_utils}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/base-grid}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/geom}&quot;"/>
@@ -40,7 +41,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/surface_mesh}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.files.1334745079" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files"/>
-								<option id="gnu.cpp.compiler.option.other.other.18282590" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.18282590" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.669350950" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1120117438" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug">
@@ -109,7 +110,14 @@
 		<project id="grid-gen.cdt.managedbuild.target.gnu.lib.1488186908" name="Static Library" projectType="cdt.managedbuild.target.gnu.lib"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/grid-gen"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/grid-gen"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.lib.debug.677125522;cdt.managedbuild.config.gnu.lib.debug.677125522.;cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1120117438;cdt.managedbuild.tool.gnu.c.compiler.input.274695363">
