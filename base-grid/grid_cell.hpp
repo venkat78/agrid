@@ -65,9 +65,9 @@ class tGRID_CELL_ENTRY {
 template<typename _MESH_TYPE>
 class tGRID_CELL {
  public:
-  typedef tGRID_CELL_ENTRY<_MESH_TYPE> cGRID_CELL_ENTRY;
-  typedef typename cGRID_CELL_ENTRY::cMANIFOLD_RECORD cMANIFOLD_RECORD;
-  typedef std::vector<cGRID_CELL_ENTRY*> cENTRIES;
+  typedef tGRID_CELL_ENTRY<_MESH_TYPE> cENTRY;
+  typedef typename cENTRY::cMANIFOLD_RECORD cMANIFOLD_RECORD;
+  typedef std::vector<cENTRY*> cENTRIES;
  public:
   //
   tGRID_CELL()
@@ -84,7 +84,7 @@ class tGRID_CELL {
   }
 
  public:
-  typedef typename std::vector<cGRID_CELL_ENTRY*>::iterator entry_iterator;
+  typedef typename std::vector<cENTRY*>::iterator entry_iterator;
 
   entry_iterator begin() {
     return m_entries.begin();
@@ -105,18 +105,21 @@ class tGRID_CELL {
   VOID Index(INT index) {
     m_index = index;
   }
-
   INT Index() {
     return m_index;
+  }
+  cBOX3 Box()
+  {
+    return cBOX3();
   }
  public:
 
  private:
-  cGRID_CELL_ENTRY *Entry(cMANIFOLD_RECORD *record);
+  cENTRY *Entry(cMANIFOLD_RECORD *record);
 
  private:
   INT m_index;
-  std::vector<cGRID_CELL_ENTRY*> m_entries;
+  std::vector<cENTRY*> m_entries;
   eCELL_COLOR m_color;
 };
 

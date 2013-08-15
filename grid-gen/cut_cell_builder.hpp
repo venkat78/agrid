@@ -11,6 +11,7 @@ namespace grid_gen {
   template<typename _MANIFOLD_OBJ, typename _GRID_CELL>
   class tCUT_CELL_BUILDER {
       typedef std::pair<iVERTEX, iVERTEX> sEDGE;
+      typedef typename _GRID_CELL::cENTRY cGRID_CELL_ENTRY;
      public:
       /*
        * Status give the current state of the build process
@@ -25,14 +26,14 @@ namespace grid_gen {
       };
 
      public:
-      tCUT_CELL_BUILDER(_MANIFOLD_OBJ *manifold = NULL, _GRID_CELL *cell = NULL, _GRID_CELL_ENTRY *cellEntry = NULL, REAL tol = 0.0)
+      tCUT_CELL_BUILDER(_MANIFOLD_OBJ *manifold = NULL, _GRID_CELL *cell = NULL, REAL tol = 0.0)
           : m_manifold(manifold),
             m_cell(cell),
-            m_cellEntry(cellEntry),
+            m_cellEntry(cell->begin().operator*()),
             m_status(NOT_STARTED),
             m_box(m_cell->Box()),
-            m_lengthTol(tol)
-//            m_debug(false)
+            m_lengthTol(tol),
+            m_debug(false)
 
       {
       }
@@ -159,7 +160,7 @@ namespace grid_gen {
       //   std::map<iVERTEX, iVERTEX> m_meshVertexIndices;
       _MANIFOLD_OBJ* m_manifold;
       _GRID_CELL *m_cell;
-      _GRID_CELL_ENTRY *m_cellEntry;
+      cGRID_CELL_ENTRY *m_cellEntry;
       cBOX3 m_box;
       REAL m_lengthTol;
       eSTATUS m_status;

@@ -10,6 +10,7 @@ namespace grid_gen {
   template<typename _GRID_TYPE, typename _MESH_TYPE>
   class tMANIFOLD_OBJ : public tMANIFOLD_RECORD<_MESH_TYPE> {
      public:
+      typedef _MESH_TYPE cMESH;
       typedef tMANIFOLD_RECORD<_MESH_TYPE> cBASE;
       typedef typename _MESH_TYPE::cMANIFOLD cMANIFOLD;
      public:

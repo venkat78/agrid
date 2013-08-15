@@ -4,7 +4,7 @@
 namespace base_grid {
 
 template<typename _MESH_TYPE>
-typename tGRID_CELL<_MESH_TYPE>::cGRID_CELL_ENTRY*
+typename tGRID_CELL<_MESH_TYPE>::cENTRY*
 tGRID_CELL<_MESH_TYPE>::Entry(cMANIFOLD_RECORD *record) {
   INT numEntries = m_entries.size();
 
@@ -13,7 +13,7 @@ tGRID_CELL<_MESH_TYPE>::Entry(cMANIFOLD_RECORD *record) {
       return m_entries[i];
   }
 
-  cGRID_CELL_ENTRY *newEntry = ::new cGRID_CELL_ENTRY(record);
+  cENTRY *newEntry = ::new cENTRY(record);
   m_entries.push_back(newEntry);
   return newEntry;
 }
@@ -21,7 +21,7 @@ tGRID_CELL<_MESH_TYPE>::Entry(cMANIFOLD_RECORD *record) {
 template<typename _MESH_TYPE>
 VOID tGRID_CELL<_MESH_TYPE>::Register(cMANIFOLD_RECORD *record,
                                       iFACET facetIndex) {
-  cGRID_CELL_ENTRY *entry = Entry(record);
+  cENTRY *entry = Entry(record);
   entry->Register(facetIndex);
   m_color = GRAY;
 }

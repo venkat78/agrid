@@ -83,7 +83,7 @@ namespace grid_gen {
    */
   template<typename _MANIFOLD_OBJ, typename _GRID_CELL>
   VOID tCUT_CELL_BUILDER<_MANIFOLD_OBJ, _GRID_CELL>::RegisterFacetVertices() {
-    _MESH_TYPE *facetMesh = m_manifold->Mesh();
+    typename _MANIFOLD_OBJ::cMESH *facetMesh = m_manifold->Mesh();
     std::vector<iFACET> &facets = m_cellEntry->Facets();
 
     std::vector<iFACET>::iterator currFacet = facets.begin();
