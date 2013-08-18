@@ -8,6 +8,7 @@
 #ifndef MODEL_EXPORT_HPP_
 #define MODEL_EXPORT_HPP_
 
+#include "generic_model.hpp"
 #include "amoeba_model.hpp"
 
 #endif /* MODEL_EXPORT_HPP_ */

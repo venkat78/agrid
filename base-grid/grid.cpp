@@ -248,7 +248,7 @@ VOID tGRID<_GRID_ELT>::FlipColors()
   }
 }
 
-VOID CoarseNeighbors(sINDEX index, sINDEX neighbors[6]) {
+inline VOID CoarseNeighbors(sINDEX index, sINDEX neighbors[6]) {
   neighbors[0] = iCELL_INDEX(index.x - 1, index.y, index.z);
   neighbors[1] = iCELL_INDEX(index.x + 1, index.y, index.z);
   neighbors[2] = iCELL_INDEX(index.x, index.y - 1, index.z);
