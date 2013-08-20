@@ -97,7 +97,7 @@ namespace io {
     return true;
   }
 
-  BOOL ImportStl(FILE *file, cGENERIC_MODEL &model) {
+  BOOL ImportStlModel(FILE *file, cGENERIC_MODEL &model) {
     if (file == NULL)
       return false;
 
