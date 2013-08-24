@@ -106,15 +106,9 @@ namespace tmesh {
   VOID tCONSTRUCT_MANIFOLDS<_Mesh_Type>::WalkTwoManifoldEdge(cHALF_EDGE *facetHe, cFACET *facet, std::vector<BOOL> &facetsToBeFlipped,
                                                              INT &numBorderEdges, cMANIFOLD *manifold) {
     cHALF_EDGE* facetHeOpp = facetHe->Opp();
-    printf("WTME 118: f %d; HET %d HEH %d; Opp: T %d H %d ", facet->Index(), facetHe->Tail()->Index(), facetHe->Head()->Index(),
-           facetHeOpp->Tail()->Index(), facetHeOpp->Head()->Index());
-    if (facetHeOpp->Facet() == NULL)
-      printf("f NULL\n");
-    else
-      printf("f %d\n", facetHeOpp->Head()->Index());
+
     if (!facetHeOpp->IsBorder()) {
       cFACET* nextFacet = facetHeOpp->Facet();
-      printf("nextFacet %d\n", nextFacet->Index());
 
       if (nextFacet->ManifoldIndex() < 0) {
         nextFacet->ManifoldIndex(manifold->Index());
@@ -126,7 +120,6 @@ namespace tmesh {
         //checking for MOBIUS strip condition.
         BOOL facetShouldFlip = facetsToBeFlipped[facet->Index()];
         BOOL nextFacetShouldFlip = facetsToBeFlipped[nextFacet->Index()];
-        printf("facetShouldFlip %d; nextFacetShouldFlip %d\n", facetShouldFlip, nextFacetShouldFlip);
 
         if ((facetShouldFlip && !nextFacetShouldFlip) || (!facetShouldFlip && nextFacetShouldFlip))
           manifold->Orientation(NON_ORIENTABLE);
@@ -177,7 +170,6 @@ namespace tmesh {
       numFacets++;
 
       BOOL hasNonManifoldEdges = facet->HasNonManifoldEdge();
-      printf("Construct 190: f %d; hasNME %d\n", facet->Index(), hasNonManifoldEdges);
 
       typename cFACET::half_edge_circulator nextHe = facet->HalfEdgesBegin();
       typename cFACET::half_edge_circulator lastHe = facet->HalfEdgesEnd();

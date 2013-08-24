@@ -2,119 +2,116 @@
 #include "grid_generator.hpp"
 
 namespace grid_gen {
-/*
- * Methods to support registration of a model in coarse grid.
- */
-template<typename _MODEL_TYPE>
-VOID tGRID_GENERATOR<_MODEL_TYPE>::Register(_MODEL_TYPE *model) {
-  typename _MODEL_TYPE::mesh_iterator currMesh = model->MeshesBegin();
-  typename _MODEL_TYPE::mesh_iterator lastMesh = model->MeshesEnd();
-
-  for (; currMesh != lastMesh; currMesh++) {
-    Register(currMesh.operator->());
-  }
-}
-
-template<typename _MODEL_TYPE>
-VOID tGRID_GENERATOR<_MODEL_TYPE>::Register(cMESH *mesh) {
-  Slice(mesh);
-
-  INT offset = m_manifolds.size();
-
-  //Create record for each manifold.
-  typename cMESH::manifold_iterator currManifold = mesh->ManifoldsBegin();
-  typename cMESH::manifold_iterator lastManifold = mesh->ManifoldsEnd();
-
-  for (; currManifold != lastManifold; currManifold++) {
-    RegisterManifold(currManifold.operator->(), mesh);
-  }
-
   /*
-   * Method colors the global grid and individual grid for
-   * each manifold.
+   * Methods to support registration of a model in coarse grid.
    */
-  RegisterFacetsInGrids(mesh, offset);
-}
+  template<typename _MODEL_TYPE>
+  VOID tGRID_GENERATOR<_MODEL_TYPE>::Register(_MODEL_TYPE *model) {
+    typename _MODEL_TYPE::mesh_iterator currMesh = model->MeshesBegin();
+    typename _MODEL_TYPE::mesh_iterator lastMesh = model->MeshesEnd();
 
-template<typename _MODEL_TYPE>
-VOID tGRID_GENERATOR<_MODEL_TYPE>::Slice(cMESH *mesh) {
-  std::vector<iFACET> facetIndices;
+    for (; currMesh != lastMesh; currMesh++) {
+      Register(currMesh.operator->());
+    }
+  }
 
-  typename cMESH::facet_iterator currFacet = mesh->FacetsBegin();
-  typename cMESH::facet_iterator lastFacet = mesh->FacetsEnd();
+  template<typename _MODEL_TYPE>
+  VOID tGRID_GENERATOR<_MODEL_TYPE>::Register(cMESH *mesh) {
+    Slice(mesh);
 
-  for (; currFacet != lastFacet; currFacet++)
-    facetIndices.push_back(currFacet->Index());
+    INT offset = m_manifolds.size();
 
-  std::vector<iFACET>::iterator currIndex = facetIndices.begin();
-  std::vector<iFACET>::iterator lastIndex = facetIndices.end();
+    //Create record for each manifold.
+    typename cMESH::manifold_iterator currManifold = mesh->ManifoldsBegin();
+    typename cMESH::manifold_iterator lastManifold = mesh->ManifoldsEnd();
 
-  for (; currIndex != lastIndex; currIndex++) {
-    cBOX3 facetBox = mesh->Facet(*currIndex)->BoundingBox();
-    std::vector<iFACET> facetsToBeClipped;
-    facetsToBeClipped.push_back(*currIndex);
+    for (; currManifold != lastManifold; currManifold++) {
+      RegisterManifold(currManifold.operator->(), mesh);
+    }
 
-    DO_COORDS(coord)
-    {
-      iFACET oldLargestFacetIndex = mesh->LargestFacetIndex();
-      std::vector<iFACET>::iterator currFacetToBeClipped = facetsToBeClipped
-          .begin();
-      std::vector<iFACET>::iterator lastFacetToBeClipped =
-          facetsToBeClipped.end();
+    /*
+     * Method colors the global grid and individual grid for
+     * each manifold.
+     */
+    RegisterFacetsInGrids(mesh, offset);
+  }
 
-      REAL step = m_grid.CellLength(coord);
-      for (; currFacetToBeClipped != lastFacetToBeClipped;
-          currFacetToBeClipped++) {
-        //Clips facet along the lines parallel to coordinate axis.
-        REAL minVal = m_grid.CellUpperBound(facetBox.MinCoord(coord), coord);
-        REAL maxVal = m_grid.CellUpperBound(facetBox.MaxCoord(coord), coord);
+  template<typename _MODEL_TYPE>
+  VOID tGRID_GENERATOR<_MODEL_TYPE>::Slice(cMESH *mesh) {
+    std::vector<iFACET> facetIndices;
 
-        mesh->Clip(*currFacetToBeClipped, coord, minVal, maxVal, step);
+    typename cMESH::facet_iterator currFacet = mesh->FacetsBegin();
+    typename cMESH::facet_iterator lastFacet = mesh->FacetsEnd();
+
+    for (; currFacet != lastFacet; currFacet++)
+      facetIndices.push_back(currFacet->Index());
+
+    std::vector<iFACET>::iterator currIndex = facetIndices.begin();
+    std::vector<iFACET>::iterator lastIndex = facetIndices.end();
+
+    for (; currIndex != lastIndex; currIndex++) {
+      cBOX3 facetBox = mesh->Facet(*currIndex)->BoundingBox();
+      std::vector<iFACET> facetsToBeClipped;
+      facetsToBeClipped.push_back(*currIndex);
+
+      DO_COORDS(coord)
+      {
+        iFACET oldLargestFacetIndex = mesh->LargestFacetIndex();
+        std::vector<iFACET>::iterator currFacetToBeClipped = facetsToBeClipped.begin();
+        std::vector<iFACET>::iterator lastFacetToBeClipped = facetsToBeClipped.end();
+
+        REAL step = m_grid.CellLength(coord);
+        for (; currFacetToBeClipped != lastFacetToBeClipped; currFacetToBeClipped++) {
+          //Clips facet along the lines parallel to coordinate axis.
+          REAL minVal = m_grid.CellUpperBound(facetBox.MinCoord(coord), coord);
+          REAL maxVal = m_grid.CellUpperBound(facetBox.MaxCoord(coord), coord);
+
+          mesh->Clip(*currFacetToBeClipped, coord, minVal, maxVal, step);
+        }
+
+        iFACET newLargestFacetIndex = mesh->LargestFacetIndex();
+        for (INT facetIndex = oldLargestFacetIndex + 1; facetIndex <= newLargestFacetIndex; facetIndex++)
+          facetsToBeClipped.push_back(facetIndex);
       }
-
-      iFACET newLargestFacetIndex = mesh->LargestFacetIndex();
-      for (INT facetIndex = oldLargestFacetIndex + 1;
-          facetIndex <= newLargestFacetIndex; facetIndex++)
-        facetsToBeClipped.push_back(facetIndex);
-    }
-  }
-}
-
-template<typename _MODEL_TYPE>
-VOID tGRID_GENERATOR<_MODEL_TYPE>::RegisterManifold(cMANIFOLD *manifold,
-                                                    cMESH *mesh) {
-  cMANIFOLD_OBJ *record = m_manifolds.new_object();
-  ::new (record) cMANIFOLD_OBJ(m_bounds, m_numCells, manifold, mesh);
-  record->Index(m_manifolds.size() - 1);
-}
-
-template<typename _MODEL_TYPE>
-VOID tGRID_GENERATOR<_MODEL_TYPE>::RegisterFacetsInGrids(cMESH *mesh,
-                                                         INT offset) {
-  typename cMESH::facet_iterator currFacet = mesh->FacetsBegin();
-  typename cMESH::facet_iterator lastFacet = mesh->FacetsEnd();
-
-  for (; currFacet != lastFacet; currFacet++) {
-    iCELL_INDEX cellIndices[2];
-    INT numCells = m_grid.ModifiedCellIndex(currFacet->MeanPoint(),
-                                            currFacet->Normal(), cellIndices);
-
-    for (INT i = 0; i < numCells; i++) {
-      //Add facet and manifold to gray-cell entry.
-      iMANIFOLD manifoldIndex = currFacet->ManifoldIndex();
-      cMANIFOLD_OBJ *record = m_manifolds.object_at(offset + manifoldIndex);
-
-      //Registering facets in local and global grids.
-      cGRID_CELL *globalCell = m_grid.CoarseElement(cellIndices[i]);
-      globalCell->Register(record, currFacet->Index());
-      m_grid.CellColor(cellIndices[i], GRAY);
-
-      cGRID_CELL *localCell = record->Grid()->CoarseElement(cellIndices[i]);
-      localCell->Register(record, currFacet->Index());
-      record->Grid()->CellColor(cellIndices[i], GRAY);
     }
   }
 
-}
+  template<typename _MODEL_TYPE>
+  VOID tGRID_GENERATOR<_MODEL_TYPE>::RegisterManifold(cMANIFOLD *manifold, cMESH *mesh) {
+    cMANIFOLD_OBJ *record = m_manifolds.new_object();
+    ::new (record) cMANIFOLD_OBJ(m_bounds, m_numCells, manifold, mesh);
+    record->Index(m_manifolds.size() - 1);
+  }
+
+  template<typename _MODEL_TYPE>
+  VOID tGRID_GENERATOR<_MODEL_TYPE>::RegisterFacetsInGrids(cMESH *mesh, INT offset) {
+    typename cMESH::facet_iterator currFacet = mesh->FacetsBegin();
+    typename cMESH::facet_iterator lastFacet = mesh->FacetsEnd();
+
+    for (; currFacet != lastFacet; currFacet++) {
+      iCELL_INDEX cellIndices[2];
+      INT numCells = m_grid.ModifiedCellIndex(currFacet->MeanPoint(), currFacet->Normal(), cellIndices);
+
+      for (INT i = 0; i < numCells; i++) {
+        //Add facet and manifold to gray-cell entry.
+        iMANIFOLD manifoldIndex = currFacet->ManifoldIndex();
+        cMANIFOLD_OBJ *record = m_manifolds.object_at(offset + manifoldIndex);
+
+        //Registering facets in local and global grids.
+        cGRID_CELL *globalCell = m_grid.CoarseElement(cellIndices[i]);
+        if (globalCell == NULL)
+          globalCell = m_grid.AddCoarseElement(cellIndices[i]);
+        globalCell->Register(record, currFacet->Index());
+        m_grid.CellColor(cellIndices[i], GRAY);
+
+        cGRID_CELL *localCell = record->Grid()->CoarseElement(cellIndices[i]);
+        if (localCell == NULL)
+          localCell = record->Grid()->AddCoarseElement(cellIndices[i]);
+        localCell->Register(record, currFacet->Index());
+        record->Grid()->CellColor(cellIndices[i], GRAY);
+      }
+    }
+
+  }
 
 }
