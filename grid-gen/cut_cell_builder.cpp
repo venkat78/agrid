@@ -624,6 +624,24 @@ namespace grid_gen {
     }
   }
 
+  template<typename _MANIFOLD_OBJ, typename _GRID_CELL>
+  VOID tCUT_CELL_BUILDER<_MANIFOLD_OBJ, _GRID_CELL>::SplitWhiteAndBlackPortions(cCUT_CELL_CLAY &whiteClay, cCUT_CELL_CLAY &blackClay) {
+    std::vector<iFACET> whiteFacets, blackFacets;
+
+    cCUT_CELL_CLAY::facet_iterator currFacet = m_clay.FacetsBegin();
+    cCUT_CELL_CLAY::facet_iterator lastFacet = m_clay.FacetsEnd();
+
+    for (; currFacet != lastFacet; currFacet++) {
+      iFACET facetIndex = currFacet->Index();
+      if (IsBlack(facetIndex))
+        blackFacets.push_back(facetIndex);
+      else
+        whiteFacets.push_back(facetIndex);
+    }
+
+    MeshFromFacets(whiteFacets, m_clay, whiteClay);
+    MeshFromFacets(blackFacets, m_clay, blackClay);
+  }
   /*
    *   Algorithm.
    *   The basic idea is to start with a mesh representing the box,
@@ -716,8 +734,8 @@ namespace grid_gen {
     //Create faces that originate at white vertices.
     CreateWhiteFaces();
 
-    if (m_manifold->IsOpen())
-      ReflectGrayVertices();
+//    if (m_manifold->IsOpen())
+//      ReflectGrayVertices();
 
     m_status = CREATED_WHITE_FACES;
 
@@ -727,35 +745,33 @@ namespace grid_gen {
       ExportToOff<cCUT_CELL_CLAY, sCUT_CELL_CLAY_FILTER>("white_and_black_faces.off", m_clay, filter);
     }
 
-    //Remove black facets.
-    if (!RemoveBlackFaces()) {
-      //       //Code here may be not be required. Revisit, Bujji -3/5/2010
-      //       //Fix for gray cell no 221 in agrid_pyramid_test().
-      //       BOOL facesRemoved = false;
-      //       if(AnyCornerVerticesColorUnknown() || AreAllCornerVerticesWhite()) {
-      // 	//Screwy advancing front.
-      // 	facesRemoved = UseNormalsToRemoveBlackFaces();
-      //       }
+    cCUT_CELL_CLAY whiteClay, blackClay;
+    SplitWhiteAndBlackPortions(whiteClay, blackClay);
 
-      //if(!facesRemoved) {
-      if (m_clay.NumFacets() == 6)
-        RemoveNonCornerVertices();
-      //}
+    whiteClay.ConstructManifolds();
+    blackClay.ConstructManifolds();
+
+    typename cCUT_CELL_CLAY::manifold_iterator currManifold = whiteClay.ManifoldsBegin();
+    typename cCUT_CELL_CLAY::manifold_iterator lastManifold = whiteClay.ManifoldsEnd();
+
+    for (; currManifold != lastManifold; currManifold++) {
+      cSURFACE_MESH mesh;
+      MeshFromManifold(currManifold->Index(), whiteClay, mesh);
     }
 
-    m_status = REMOVED_BLACK_FACES;
+    currManifold = blackClay.ManifoldsBegin();
+    lastManifold = blackClay.ManifoldsEnd();
 
-    if (m_debug) {
-      printf("%d %d\n", m_clay.NumVertices(), m_clay.NumFacets());
-      sCUT_CELL_CLAY_FILTER filter(&m_clay);
-      ExportToOff<cCUT_CELL_CLAY, sCUT_CELL_CLAY_FILTER>("removed_black_faces.off", m_clay, filter);
+    for (; currManifold != lastManifold; currManifold++) {
+      cSURFACE_MESH mesh;
+      MeshFromManifold(currManifold->Index(), blackClay, mesh);
     }
 
-    if (m_clay.NumFacets() == 0 && m_clay.NumVertices() == 0) {
-      //      m_cell->ExportLastEntryToOff();
-      //assert(0);
-      return true;
-    }
+//    if (m_debug) {
+//      printf("%d %d\n", m_clay.NumVertices(), m_clay.NumFacets());
+//      sCUT_CELL_CLAY_FILTER filter(&m_clay);
+//      ExportToOff<cCUT_CELL_CLAY, sCUT_CELL_CLAY_FILTER>("removed_black_faces.off", m_clay, filter);
+//    }
 
     //     //Extract cut-cells from the m_clay.
     BOOL retVal1 = true;

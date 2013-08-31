@@ -139,6 +139,8 @@ namespace grid_gen {
 
 //     VOID RemoveLatticeEdge(sEDGE edge);
 
+      VOID SplitWhiteAndBlackPortions(cCUT_CELL_CLAY &whiteClay, cCUT_CELL_CLAY &blackClay);
+
       VOID RemoveEdges(tLIST<sEDGE> &tinyEdges);
 
       VOID CollectTinyEdges(tLIST<sEDGE> &tinyEdges);
