@@ -763,8 +763,8 @@ namespace grid_gen {
     lastManifold = blackClay.ManifoldsEnd();
 
     for (; currManifold != lastManifold; currManifold++) {
-      cSURFACE_MESH mesh;
-      MeshFromManifold(currManifold->Index(), blackClay, mesh);
+      cCUT_CELL *cutCell = m_cellEntry->NewCutCell();
+      MeshFromManifold(currManifold->Index(), blackClay, *cutCell);
     }
 
 //    if (m_debug) {

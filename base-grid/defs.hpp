@@ -23,6 +23,8 @@ using namespace geom;
 #include "tmesh.hpp"
 using namespace tmesh;
 
+#include "agrid_mesh.hpp"
+
 namespace base_grid {
 enum eCELL_COLOR {
   UNKNOWN = -1,
