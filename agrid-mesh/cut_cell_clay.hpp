@@ -45,35 +45,41 @@ class tCUT_CELL_CLAY_VERTEX : public tmesh::tVERTEX<_Mesh_Entities> {
       return m_color;
     }
 
-//  //For grid vertex mesh = NULL;
-//  VOID Source(INT srcIndex, cSURFACE_MESH *mesh = NULL) {
-//    m_srcIndex = srcIndex;
-//    m_srcMesh = mesh;
-//  }
-//
-//  iVERTEX SourceIndex() {
-//    return m_srcIndex;
-//  }
-//
-//  cSURFACE_MESH *SourceMesh() {
-//    return m_srcMesh;
-//  }
-//
-//  VOID IsReflection(BOOL flag) { m_isReflection = flag; }
-//
-//  BOOL IsReflection() { return m_isReflection; }
-//
-//  VOID Reflection(iVERTEX vertexIndex) {
-//    m_reflection = vertexIndex;
-//  }
-//
-//  iVERTEX Reflection() { return m_reflection; }
+    //For grid vertex mesh = NULL;
+    VOID Source(INT srcIndex, cSURFACE_MESH *mesh = NULL) {
+      m_srcIndex = srcIndex;
+      m_srcMesh = mesh;
+    }
+
+    iVERTEX SourceIndex() {
+      return m_srcIndex;
+    }
+
+    cSURFACE_MESH *SourceMesh() {
+      return m_srcMesh;
+    }
+
+    VOID IsReflection(BOOL flag) {
+      m_isReflection = flag;
+    }
+
+    BOOL IsReflection() {
+      return m_isReflection;
+    }
+
+    VOID Reflection(iVERTEX vertexIndex) {
+      m_reflection = vertexIndex;
+    }
+
+    iVERTEX Reflection() {
+      return m_reflection;
+    }
 
    protected:
-//  BOOL m_isReflection;
-//  iVERTEX m_reflection;
-//  iVERTEX m_srcIndex;
-//  cSURFACE_MESH *m_srcMesh; //For a grid vertex m_srcMesh = NULL;
+  BOOL m_isReflection;
+  iVERTEX m_reflection;
+  iVERTEX m_srcIndex;
+  cSURFACE_MESH *m_srcMesh; //For a grid vertex m_srcMesh = NULL;
     eCELL_COLOR m_color;
 };
 

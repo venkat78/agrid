@@ -11,3 +11,4 @@
 #include "grid_generator.cpp"
 
 template class tGRID_GENERATOR<cGENERIC_MODEL> ;
+
