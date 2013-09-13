@@ -114,8 +114,59 @@ namespace grid_gen {
 
   }
 
-//  template <typename _MESH_TYPE>
-//  VOID tGRID_GENERATOR<_MODEL_TYPE>::ConstructGrids() {
-//
-//  }
-}
+  /*
+   *
+   */
+  template<typename _MODEL_TYPE>
+  VOID tGRID_GENERATOR<_MODEL_TYPE>::Populate(std::vector<cGRID_CELL*> &cells) {
+    for (INT i = 0; i < m_grid.NumCells(GEOM_X); i++) {
+      for (INT j = 0; j < m_grid.NumCells(GEOM_Y); j++) {
+        for (INT k = 0; k < m_grid.NumCells(GEOM_Z); k++) {
+          cGRID_CELL *cell = m_grid.CoarseElement(iCELL_INDEX(i, j, k));
+          ASSERT(cell != NULL);
+          cells.push_back(cell);
+        }
+      }
+    }
+  }
+
+  template<typename _MODEL_TYPE>
+  BOOL tGRID_GENERATOR<_MODEL_TYPE>::Process(cGRID_CELL *cell) {
+    //If the cells needs subdivision subdivide or generate cut-cells.
+    tCUT_CELL_BUILDER<cMANIFOLD_OBJ, cGRID_CELL> builder(cell);
+    return builder.Build();
+  }
+
+  /*
+   * Collects all base grid cells and processes them as long as there are no cells
+   * to process. Meat of the process.
+   */
+  template<typename _MODEL_TYPE>
+  VOID tGRID_GENERATOR<_MODEL_TYPE>::Build(cVOLUMETRIC_GRID *grid) {
+    std::vector<cGRID_CELL*> cells;
+    Populate(cells);
+
+    INT i = 0;
+    while (i < cells.size()) {
+      Process(cells[i]);
+      i++;
+    }
+
+    StitchCutCells(cells, grid)
+  }
+
+  template<typename _MODEL_TYPE>
+  BOOL tGRID_GENERATOR<_MODEL_TYPE>::StitchCutCells(std::vector<cGRID_CELL *> &processedCells, cVOLUMETRIC_GRID *grid) {
+    typename std::vector<cGRID_CELL*>::iterator currCell = processedCells.begin();
+    typename std::vector<cGRID_CELL*>::iterator lastCell = processedCells.end();
+
+    for( ; currCell != lastCell; currCell++) {
+      cGRID_CELL::cut_cell_iterator currCutCell = (*currCell)->CutCellsBegin();
+      cGRID_CELL::cut_cell_iterator lastCutCell = (*currCell)->CutCellsEnd();  //cutCells.end();
+      for (; currCutCell != lastCutCell; currCutCell++) {
+//        adhesive.Add(*(*currCutCell), index);
+//        numCutCells++;
+
+      }
+    }
+  }
