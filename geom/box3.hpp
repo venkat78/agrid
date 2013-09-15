@@ -211,6 +211,13 @@ namespace geom {
     INT VertexPointIndex(const cPOINT3& point) const;
     cBOX3 &Grow(REAL factor);
     cBOX3 GrowBy(INT percentage = 5) const ;
+    cBOX3& GrowBy(REAL delta[3]) {
+      DO_COORDS(i){
+          Min()[i] -= delta[i];
+          Max()[i] += delta[i];
+        }
+        return *this;
+    }
   protected:
     tPAIR<cPOINT3> m_cornerPoints;
   };

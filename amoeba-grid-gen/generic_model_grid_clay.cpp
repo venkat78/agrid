@@ -8,6 +8,7 @@
 #include "defs.hpp"
 #include "generic_model_grid_defs.hpp"
 #include "base_grid.cpp"
+#include "grid_gen.cpp"
 
 typedef cDEFINE_GENERIC_MODEL_GRID::cGRID_CELL cGENERIC_MODEL_GRID_CELL;
 typedef cDEFINE_GENERIC_MODEL_GRID::cMESH cGENERIC_MESH;

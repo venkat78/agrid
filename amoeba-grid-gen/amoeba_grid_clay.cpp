@@ -8,6 +8,7 @@
 #include "defs.hpp"
 #include "amoeba_grid_defs.hpp"
 #include "base_grid.cpp"
+#include "grid_gen.cpp"
 
 typedef cDEFINE_AMOEBA_MODEL_GRID::cGRID_CELL cAMOEBA_GRID_CELL;
 typedef cDEFINE_AMOEBA_MODEL_GRID::cMESH cAMOEBA_MESH;

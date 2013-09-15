@@ -5,16 +5,19 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../cut_cell_builder.cpp \
+../cut_cells_adhesive.cpp \
 ../grid_gen.cpp \
 ../grid_generator.cpp 
 
 OBJS += \
 ./cut_cell_builder.o \
+./cut_cells_adhesive.o \
 ./grid_gen.o \
 ./grid_generator.o 
 
 CPP_DEPS += \
 ./cut_cell_builder.d \
+./cut_cells_adhesive.d \
 ./grid_gen.d \
 ./grid_generator.d 
 

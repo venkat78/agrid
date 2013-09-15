@@ -1,5 +1,7 @@
 #include <vector>
 #include "grid_generator.hpp"
+#include "cut_cell_builder.hpp"
+#include "cut_cells_adhesive.hpp"
 
 namespace grid_gen {
   /*
@@ -133,8 +135,10 @@ namespace grid_gen {
   template<typename _MODEL_TYPE>
   BOOL tGRID_GENERATOR<_MODEL_TYPE>::Process(cGRID_CELL *cell) {
     //If the cells needs subdivision subdivide or generate cut-cells.
-    tCUT_CELL_BUILDER<cMANIFOLD_OBJ, cGRID_CELL> builder(cell);
-    return builder.Build();
+    cMANIFOLD_OBJ *manifoldObj = reinterpret_cast<cMANIFOLD_OBJ*>((cell->begin().operator*())->Record());
+    tCUT_CELL_BUILDER<cMANIFOLD_OBJ, cGRID_CELL> builder(manifoldObj, cell);
+    cSURFACE_MESH mesh;
+    return builder.Build(&mesh);
   }
 
   /*
@@ -152,21 +156,25 @@ namespace grid_gen {
       i++;
     }
 
-    StitchCutCells(cells, grid)
+    StitchCutCells(cells, grid);
   }
 
   template<typename _MODEL_TYPE>
-  BOOL tGRID_GENERATOR<_MODEL_TYPE>::StitchCutCells(std::vector<cGRID_CELL *> &processedCells, cVOLUMETRIC_GRID *grid) {
+  BOOL tGRID_GENERATOR<_MODEL_TYPE>::StitchCutCells(std::vector<cGRID_CELL*> &processedCells, cVOLUMETRIC_GRID *grid) {
+    cCUT_CELLS_ADHESIVE adhesive;
     typename std::vector<cGRID_CELL*>::iterator currCell = processedCells.begin();
     typename std::vector<cGRID_CELL*>::iterator lastCell = processedCells.end();
 
-    for( ; currCell != lastCell; currCell++) {
-      cGRID_CELL::cut_cell_iterator currCutCell = (*currCell)->CutCellsBegin();
-      cGRID_CELL::cut_cell_iterator lastCutCell = (*currCell)->CutCellsEnd();  //cutCells.end();
-      for (; currCutCell != lastCutCell; currCutCell++) {
-//        adhesive.Add(*(*currCutCell), index);
-//        numCutCells++;
+    for (; currCell != lastCell; currCell++) {
+      if ((*currCell)->NumEntries() == 1) {
+        typename cGRID_CELL::entry_iterator entry = (*currCell)->begin();
 
+        typename cGRID_CELL::cENTRY::cut_cell_iterator currCutCell = (*entry)->CutCellsBegin();
+        typename cGRID_CELL::cENTRY::cut_cell_iterator lastCutCell = (*entry)->CutCellsEnd();  //cutCells.end();
+        for (; currCutCell != lastCutCell; currCutCell++) {
+          adhesive.Add(*(*currCutCell));
+        }
       }
     }
   }
+}

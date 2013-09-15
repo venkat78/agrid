@@ -133,7 +133,7 @@ namespace tmesh {
     typename _Mesh_Type_A::cMANIFOLD::facet_iterator lastFacet = manifold->FacetsEnd();
 
     for (; currFacet != lastFacet; currFacet++) {
-      facets.push_back(currFacet->GetIndex());
+      facets.push_back(currFacet->Index());
     }
 
     MeshFromFacets(facets, oldMesh, newMesh);

@@ -8,6 +8,6 @@
 #include "defs.hpp"
 
 #include "amoeba_grid_defs.hpp"
-#include "grid_generator.cpp"
+#include "grid_gen.cpp"
 
 template class tGRID_GENERATOR<cAMOEBA_MODEL> ;

@@ -8,21 +8,24 @@ CPP_SRCS += \
 ../amoeba_grid_generator.cpp \
 ../generic_model_grid_clay.cpp \
 ../generic_model_grid_generator.cpp \
-../test.cpp 
+../test.cpp \
+../test_a_simple_box.cpp 
 
 OBJS += \
 ./amoeba_grid_clay.o \
 ./amoeba_grid_generator.o \
 ./generic_model_grid_clay.o \
 ./generic_model_grid_generator.o \
-./test.o 
+./test.o \
+./test_a_simple_box.o 
 
 CPP_DEPS += \
 ./amoeba_grid_clay.d \
 ./amoeba_grid_generator.d \
 ./generic_model_grid_clay.d \
 ./generic_model_grid_generator.d \
-./test.d 
+./test.d \
+./test_a_simple_box.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

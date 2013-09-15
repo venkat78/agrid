@@ -4,17 +4,17 @@
  * A cBOX3 topology enumeration.
  * Should be moved out of here at a later time.
  */
-INT vertex_face_incidence[8][3] = { { 0, 1, 2 }, { 0, 1, 5 }, { 0, 2, 4 }, { 0, 5, 5 }, { 1, 2, 3 }, { 1, 3, 5 }, { 2, 3, 4 }, { 3, 4, 5 } };
+const INT vertex_face_incidence[8][3] = { { 0, 1, 2 }, { 0, 1, 5 }, { 0, 2, 4 }, { 0, 5, 5 }, { 1, 2, 3 }, { 1, 3, 5 }, { 2, 3, 4 }, { 3, 4, 5 } };
 
 //This is to store tuples info
 //for box vertices
-INT vertex_enumeration[8][3] = { { 0, 0, 0 }, { 0, 0, 1 }, { 0, 1, 0 }, { 0, 1, 1 }, { 1, 0, 0 }, { 1, 0, 1 }, { 1, 1, 0 }, { 1, 1, 1 }, };
+const INT vertex_enumeration[8][3] = { { 0, 0, 0 }, { 0, 0, 1 }, { 0, 1, 0 }, { 0, 1, 1 }, { 1, 0, 0 }, { 1, 0, 1 }, { 1, 1, 0 }, { 1, 1, 1 }, };
 
-INT edge_vertices[12][2] = { { 0, 1 }, { 0, 2 }, { 0, 4 }, { 1, 3 }, { 1, 5 }, { 2, 3 }, { 2, 6 }, { 4, 5 }, { 4, 6 }, { 7, 6 }, { 7, 5 }, { 7, 3 } };
+const INT edge_vertices[12][2] = { { 0, 1 }, { 0, 2 }, { 0, 4 }, { 1, 3 }, { 1, 5 }, { 2, 3 }, { 2, 6 }, { 4, 5 }, { 4, 6 }, { 7, 6 }, { 7, 5 }, { 7, 3 } };
 
-INT edge_faces[12][2] = { { 0, 1 }, { 0, 2 }, { 1, 2 }, { 0, 5 }, { 1, 5 }, { 0, 4 }, { 2, 4 }, { 1, 3 }, { 2, 3 }, { 3, 4 }, { 3, 5 }, { 4, 5 } };
+const INT edge_faces[12][2] = { { 0, 1 }, { 0, 2 }, { 1, 2 }, { 0, 5 }, { 1, 5 }, { 0, 4 }, { 2, 4 }, { 1, 3 }, { 2, 3 }, { 3, 4 }, { 3, 5 }, { 4, 5 } };
 
-INT face_vertices[6][4] = { { 0, 1, 3, 2 }, { 0, 4, 5, 1 }, { 0, 2, 6, 4 }, { 6, 7, 5, 4 }, { 2, 3, 7, 6 }, { 1, 5, 7, 3 } };
+const INT face_vertices[6][4] = { { 0, 1, 3, 2 }, { 0, 4, 5, 1 }, { 0, 2, 6, 4 }, { 6, 7, 5, 4 }, { 2, 3, 7, 6 }, { 1, 5, 7, 3 } };
 
 namespace grid_gen {
 //  BOOL tCUT_CELL_BUILDER<_MANIFOLD_OBJ, _GRID_CELL>::m_debug = false;
@@ -246,7 +246,7 @@ namespace grid_gen {
     INT largestVertexIndex = m_clay.LargestVertexIndex();
 
     if (largestVertexIndex >= 8 && m_clay.LargestFacetIndex() >= 6) {
-      m_cell->Index().Print();
+      printf("%d\n",m_cell->Index());
       //      m_cell->ExportLastEntryToOff();
       assert(0);
     }
@@ -755,8 +755,8 @@ namespace grid_gen {
     typename cCUT_CELL_CLAY::manifold_iterator lastManifold = whiteClay.ManifoldsEnd();
 
     for (; currManifold != lastManifold; currManifold++) {
-      cSURFACE_MESH mesh;
-      MeshFromManifold(currManifold->Index(), whiteClay, mesh);
+      cCUT_CELL *cutCell = m_cellEntry->NewCutCell();
+      MeshFromManifold(currManifold->Index(), whiteClay, *cutCell);
     }
 
     currManifold = blackClay.ManifoldsBegin();

@@ -51,6 +51,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1794180750" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.paths.1862993375" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/base-grid/Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/grid-gen/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/agrid-mesh/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/geom/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/grid-gen/Debug}&quot;"/>
@@ -64,6 +65,7 @@
 								</option>
 								<option id="gnu.cpp.link.option.libs.680148489" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="hdf5"/>
+									<listOptionValue builtIn="false" value="grid-gen"/>
 									<listOptionValue builtIn="false" value="agrid-mesh"/>
 									<listOptionValue builtIn="false" value="hdf5_cpp"/>
 									<listOptionValue builtIn="false" value="base-grid"/>

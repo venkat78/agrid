@@ -66,6 +66,23 @@ namespace model {
      private:
       tMODEL_OBJECT_FACTORY<_MODEL_OBJECT_ATTRIBUTES> m_factory;
   };
+
+  template <typename _MODEL_TYPE>
+  cBOX3 ModelBoundingBox(_MODEL_TYPE *model)
+  {
+    typedef typename _MODEL_TYPE::cMESH cMESH;
+    typedef typename _MODEL_TYPE::mesh_iterator mesh_iterator;
+
+    mesh_iterator currMesh = model->MeshesBegin();
+    mesh_iterator lastMesh = model->MeshesEnd();
+
+    cBOX3 box;
+    for( ; currMesh != lastMesh ; currMesh++ ) {
+      box |= currMesh->BoundingBox();
+    }
+
+    return box;
+  }
 }
 
 #endif /* MODEL_HPP_ */

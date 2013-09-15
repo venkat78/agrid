@@ -8,7 +8,7 @@
 #include "defs.hpp"
 
 #include "generic_model_grid_defs.hpp"
-#include "grid_generator.cpp"
+#include "grid_gen.cpp"
 
 template class tGRID_GENERATOR<cGENERIC_MODEL> ;
 
