@@ -59,8 +59,13 @@ namespace grid_gen {
        */
       VOID RegisterFacetsInGrids(cMESH *mesh, INT offset);
 
+      VOID PopulateManifoldGrids();
+      /*
+       * Paint black and white cells in rectilinear grid.
+       */
+      VOID Paint();
       VOID Populate(std::vector<cGRID_CELL*> &cells);
-      BOOL Process(cGRID_CELL *cell);
+      BOOL Process(cGRID_CELL *cell, cMANIFOLD_OBJ *manifoldObj);
       BOOL StitchCutCells(std::vector<cGRID_CELL*> &voxels, cVOLUMETRIC_GRID *grid);
      private:
       /*

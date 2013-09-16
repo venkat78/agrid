@@ -142,8 +142,18 @@ namespace base_grid {
       INT Index() {
         return m_index;
       }
-      cBOX3 Box() {
-        return cBOX3();
+      const cBOX3& Box() const {
+        return m_box;
+      }
+      VOID Box(const cBOX3 &box) {
+        m_box = box;
+      }
+      eCELL_COLOR Color() const {
+        return m_color;
+      }
+
+      VOID Color(eCELL_COLOR color) {
+        m_color = color;
       }
      public:
 
@@ -153,6 +163,7 @@ namespace base_grid {
      private:
       INT m_index;
       std::vector<cENTRY*> m_entries;
+      cBOX3 m_box;
       eCELL_COLOR m_color;
   };
 

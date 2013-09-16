@@ -15,6 +15,18 @@ namespace grid_gen {
     for (; currMesh != lastMesh; currMesh++) {
       Register(currMesh.operator->());
     }
+
+    PopulateManifoldGrids();
+  }
+
+  template<typename _MODEL_TYPE>
+  VOID tGRID_GENERATOR<_MODEL_TYPE>::PopulateManifoldGrids() {
+    INT numManifolds = m_manifolds.size();
+
+    for (INT i = 0; i < numManifolds; i++) {
+      cGRID *grid = m_manifolds[i].Grid();
+      grid->FloodFill();
+    }
   }
 
   template<typename _MODEL_TYPE>
@@ -104,41 +116,40 @@ namespace grid_gen {
         if (globalCell == NULL)
           globalCell = m_grid.AddCoarseElement(cellIndices[i]);
         globalCell->Register(record, currFacet->Index());
+        globalCell->Color(GRAY);
         m_grid.CellColor(cellIndices[i], GRAY);
 
         cGRID_CELL *localCell = record->Grid()->CoarseElement(cellIndices[i]);
         if (localCell == NULL)
           localCell = record->Grid()->AddCoarseElement(cellIndices[i]);
         localCell->Register(record, currFacet->Index());
+        localCell->Color(GRAY);
         record->Grid()->CellColor(cellIndices[i], GRAY);
       }
     }
-
   }
 
   /*
    *
    */
-  template<typename _MODEL_TYPE>
-  VOID tGRID_GENERATOR<_MODEL_TYPE>::Populate(std::vector<cGRID_CELL*> &cells) {
-    for (INT i = 0; i < m_grid.NumCells(GEOM_X); i++) {
-      for (INT j = 0; j < m_grid.NumCells(GEOM_Y); j++) {
-        for (INT k = 0; k < m_grid.NumCells(GEOM_Z); k++) {
-          cGRID_CELL *cell = m_grid.CoarseElement(iCELL_INDEX(i, j, k));
+  template<typename _GRID_TYPE, typename _GRID_CELL>
+  VOID CellsQueue(_GRID_TYPE *grid, std::vector<_GRID_CELL*> &queue) {
+    for (INT i = 0; i < grid->NumCells(GEOM_X); i++) {
+      for (INT j = 0; j < grid->NumCells(GEOM_Y); j++) {
+        for (INT k = 0; k < grid->NumCells(GEOM_Z); k++) {
+          _GRID_CELL *cell = grid->CoarseElement(iCELL_INDEX(i, j, k));
           ASSERT(cell != NULL);
-          cells.push_back(cell);
+          queue.push_back(cell);
         }
       }
     }
   }
 
   template<typename _MODEL_TYPE>
-  BOOL tGRID_GENERATOR<_MODEL_TYPE>::Process(cGRID_CELL *cell) {
+  BOOL tGRID_GENERATOR<_MODEL_TYPE>::Process(cGRID_CELL *cell, cMANIFOLD_OBJ *record) {
     //If the cells needs subdivision subdivide or generate cut-cells.
-    cMANIFOLD_OBJ *manifoldObj = reinterpret_cast<cMANIFOLD_OBJ*>((cell->begin().operator*())->Record());
-    tCUT_CELL_BUILDER<cMANIFOLD_OBJ, cGRID_CELL> builder(manifoldObj, cell);
-    cSURFACE_MESH mesh;
-    return builder.Build(&mesh);
+    tCUT_CELL_BUILDER<cMANIFOLD_OBJ, cGRID_CELL> builder(record, cell);
+    return builder.Build();
   }
 
   /*
@@ -147,16 +158,24 @@ namespace grid_gen {
    */
   template<typename _MODEL_TYPE>
   VOID tGRID_GENERATOR<_MODEL_TYPE>::Build(cVOLUMETRIC_GRID *grid) {
-    std::vector<cGRID_CELL*> cells;
-    Populate(cells);
+    INT numManifolds = m_manifolds.size();
 
-    INT i = 0;
-    while (i < cells.size()) {
-      Process(cells[i]);
-      i++;
+    for (INT i = 0; i < numManifolds; i++) {
+      std::vector<cGRID_CELL*> queue;
+      cGRID *manifoldGrid = m_manifolds[i].Grid();
+      CellsQueue(manifoldGrid, queue);
+      INT j = 0;
+
+      while (j < queue.size()) {
+        Process(queue[j], &m_manifolds[i]);
+        j++;
+      }
+
+      /*
+       * Register cut-cells in m_grid.
+       */
+      StitchCutCells(queue, grid);
     }
-
-    StitchCutCells(cells, grid);
   }
 
   template<typename _MODEL_TYPE>
@@ -165,16 +184,20 @@ namespace grid_gen {
     typename std::vector<cGRID_CELL*>::iterator currCell = processedCells.begin();
     typename std::vector<cGRID_CELL*>::iterator lastCell = processedCells.end();
 
+    INT numCutCells = 0;
     for (; currCell != lastCell; currCell++) {
       if ((*currCell)->NumEntries() == 1) {
         typename cGRID_CELL::entry_iterator entry = (*currCell)->begin();
 
         typename cGRID_CELL::cENTRY::cut_cell_iterator currCutCell = (*entry)->CutCellsBegin();
-        typename cGRID_CELL::cENTRY::cut_cell_iterator lastCutCell = (*entry)->CutCellsEnd();  //cutCells.end();
+        typename cGRID_CELL::cENTRY::cut_cell_iterator lastCutCell = (*entry)->CutCellsEnd();
         for (; currCutCell != lastCutCell; currCutCell++) {
+          (*currCutCell)->Close();
           adhesive.Add(*(*currCutCell));
+          numCutCells++;
         }
       }
     }
+    printf("Num cut cells %d\n", numCutCells);
   }
 }

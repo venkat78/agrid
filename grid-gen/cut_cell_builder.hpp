@@ -29,13 +29,11 @@ namespace grid_gen {
       tCUT_CELL_BUILDER(_MANIFOLD_OBJ *manifold = NULL, _GRID_CELL *cell = NULL, REAL tol = 0.0)
           : m_manifold(manifold),
             m_cell(cell),
-            m_cellEntry(cell->begin().operator*()),
             m_status(NOT_STARTED),
             m_box(m_cell->Box()),
             m_lengthTol(tol),
-            m_debug(false)
-
-      {
+            m_debug(false) {
+        m_cellEntry = cell->NumEntries() ? cell->begin().operator*() : NULL;
       }
 
       /*
