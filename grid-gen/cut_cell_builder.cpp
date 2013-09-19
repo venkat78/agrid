@@ -83,6 +83,11 @@ namespace grid_gen {
    */
   template<typename _MANIFOLD_OBJ, typename _GRID_CELL>
   VOID tCUT_CELL_BUILDER<_MANIFOLD_OBJ, _GRID_CELL>::RegisterFacetVertices() {
+    /*
+     * Nothing to register for a white or black cell.
+     */
+    if(m_cellEntry == NULL)
+      return;
     typename _MANIFOLD_OBJ::cMESH *facetMesh = m_manifold->Mesh();
     std::vector<iFACET> &facets = m_cellEntry->Facets();
 
@@ -755,7 +760,7 @@ namespace grid_gen {
     typename cCUT_CELL_CLAY::manifold_iterator lastManifold = whiteClay.ManifoldsEnd();
 
     for (; currManifold != lastManifold; currManifold++) {
-      cCUT_CELL *cutCell = m_cellEntry->NewCutCell();
+      cCUT_CELL *cutCell = m_cellEntry ? m_cellEntry->NewCutCell() : m_cell->NewCutCell();
       MeshFromManifold(currManifold->Index(), whiteClay, *cutCell);
     }
 
@@ -763,7 +768,7 @@ namespace grid_gen {
     lastManifold = blackClay.ManifoldsEnd();
 
     for (; currManifold != lastManifold; currManifold++) {
-      cCUT_CELL *cutCell = m_cellEntry->NewCutCell();
+      cCUT_CELL *cutCell = m_cellEntry ? m_cellEntry->NewCutCell() : m_cell->NewCutCell();
       MeshFromManifold(currManifold->Index(), blackClay, *cutCell);
     }
 
@@ -775,7 +780,7 @@ namespace grid_gen {
 
     //     //Extract cut-cells from the m_clay.
     BOOL retVal1 = true;
-    retVal1 = ExtractCutCells(bfacesMesh);
+//    retVal1 = ExtractCutCells(bfacesMesh);
 
     m_status = EXTRACTED_CUT_CELLS;
 

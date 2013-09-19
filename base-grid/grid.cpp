@@ -128,7 +128,8 @@ namespace base_grid {
   }
 
   template<typename _GRID_ELT>
-  VOID tGRID<_GRID_ELT>::CollectWhiteVertices() {
+  VOID tGRID<_GRID_ELT>::CollectWhiteAndBlackVertices() {
+    //Mark white vertices.
     cGRID_CELL_COLORS::iterator currPos = m_cellColors.begin();
     cGRID_CELL_COLORS::iterator lastPos = m_cellColors.end();
 
@@ -146,6 +147,26 @@ namespace base_grid {
         }
       }
     }
+
+    //Mark black vertices.
+    currPos = m_cellColors.begin();
+    lastPos = m_cellColors.end();
+
+    for (; currPos != lastPos; currPos++) {
+      if (currPos->second == WHITE) {
+        iCELL_INDEX cellIndex = currPos->first;
+
+        for (INT i = 0; i < 2; i++) {
+          for (INT j = 0; j < 2; j++) {
+            for (INT k = 0; k < 2; k++) {
+              iGRID_VERTEX vIndex(cellIndex.x + i, cellIndex.y + j, cellIndex.z + k);
+              m_vertexColors[vIndex] = WHITE;
+            }
+          }
+        }
+      }
+    }
+
   }
 
   template<typename _GRID_ELT>
@@ -285,7 +306,7 @@ namespace base_grid {
     CreateBlackAndWhiteGridCells();
 //  FlipColors();
 
-//  CollectWhiteVertices();
+    CollectWhiteAndBlackVertices();
   }
 
   template<typename _GRID_ELT>

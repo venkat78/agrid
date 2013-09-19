@@ -196,6 +196,14 @@ namespace grid_gen {
           adhesive.Add(*(*currCutCell));
           numCutCells++;
         }
+      } else {
+        typename cGRID_CELL::cENTRY::cut_cell_iterator currCutCell = (*currCell)->CutCellsBegin();
+        typename cGRID_CELL::cENTRY::cut_cell_iterator lastCutCell = (*currCell)->CutCellsEnd();
+        for (; currCutCell != lastCutCell; currCutCell++) {
+          (*currCutCell)->Close();
+          adhesive.Add(*(*currCutCell));
+          numCutCells++;
+        }
       }
     }
     printf("Num cut cells %d\n", numCutCells);

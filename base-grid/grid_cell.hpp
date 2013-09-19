@@ -129,6 +129,11 @@ namespace base_grid {
       }
 
      public:
+      cCUT_CELL* NewCutCell() {
+        cCUT_CELL *cell = ::new cCUT_CELL();
+        m_cutCells.push_back(cell);
+        return cell;
+      }
 
       VOID Register(cMANIFOLD_RECORD *record, iFACET facet);
       VOID Export();
@@ -156,6 +161,14 @@ namespace base_grid {
         m_color = color;
       }
      public:
+      typedef std::vector<cCUT_CELL*>::iterator cut_cell_iterator;
+
+      cut_cell_iterator CutCellsBegin() { return m_cutCells.begin(); }
+      cut_cell_iterator CutCellsEnd() { return m_cutCells.end(); }
+
+      std::vector<cCUT_CELL*>& CutCells() {
+        return m_cutCells;
+      }
 
      private:
       cENTRY *Entry(cMANIFOLD_RECORD *record);
@@ -163,6 +176,7 @@ namespace base_grid {
      private:
       INT m_index;
       std::vector<cENTRY*> m_entries;
+      std::vector<cCUT_CELL*> m_cutCells;
       cBOX3 m_box;
       eCELL_COLOR m_color;
   };

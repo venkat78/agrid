@@ -138,7 +138,7 @@ namespace base_grid {
       }
 
      private:
-      VOID CollectWhiteVertices();
+      VOID CollectWhiteAndBlackVertices();
       VOID AdvancingFront(std::vector<iCELL_INDEX> &, cGRID_CELL_MARKS &);
       VOID AddToFront(eCELL_COLOR, iCELL_INDEX, std::vector<iCELL_INDEX> &, cGRID_CELL_MARKS &);
       VOID MarkBlackCells(cGRID_CELL_MARKS &visitedCells);
