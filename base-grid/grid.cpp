@@ -153,14 +153,14 @@ namespace base_grid {
     lastPos = m_cellColors.end();
 
     for (; currPos != lastPos; currPos++) {
-      if (currPos->second == WHITE) {
+      if (currPos->second == BLACK) {
         iCELL_INDEX cellIndex = currPos->first;
 
         for (INT i = 0; i < 2; i++) {
           for (INT j = 0; j < 2; j++) {
             for (INT k = 0; k < 2; k++) {
               iGRID_VERTEX vIndex(cellIndex.x + i, cellIndex.y + j, cellIndex.z + k);
-              m_vertexColors[vIndex] = WHITE;
+              m_vertexColors[vIndex] = BLACK;
             }
           }
         }
