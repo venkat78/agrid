@@ -10,9 +10,11 @@ const INT vertex_face_incidence[8][3] = { { 0, 1, 2 }, { 0, 1, 5 }, { 0, 2, 4 },
 //for box vertices
 const INT vertex_enumeration[8][3] = { { 0, 0, 0 }, { 0, 0, 1 }, { 0, 1, 0 }, { 0, 1, 1 }, { 1, 0, 0 }, { 1, 0, 1 }, { 1, 1, 0 }, { 1, 1, 1 }, };
 
-const INT edge_vertices[12][2] = { { 0, 1 }, { 0, 2 }, { 0, 4 }, { 1, 3 }, { 1, 5 }, { 2, 3 }, { 2, 6 }, { 4, 5 }, { 4, 6 }, { 7, 6 }, { 7, 5 }, { 7, 3 } };
+const INT edge_vertices[12][2] = { { 0, 1 }, { 0, 2 }, { 0, 4 }, { 1, 3 }, { 1, 5 }, { 2, 3 }, { 2, 6 }, { 4, 5 }, { 4, 6 }, { 7, 6 }, { 7, 5 }, { 7,
+    3 } };
 
-const INT edge_faces[12][2] = { { 0, 1 }, { 0, 2 }, { 1, 2 }, { 0, 5 }, { 1, 5 }, { 0, 4 }, { 2, 4 }, { 1, 3 }, { 2, 3 }, { 3, 4 }, { 3, 5 }, { 4, 5 } };
+const INT edge_faces[12][2] =
+    { { 0, 1 }, { 0, 2 }, { 1, 2 }, { 0, 5 }, { 1, 5 }, { 0, 4 }, { 2, 4 }, { 1, 3 }, { 2, 3 }, { 3, 4 }, { 3, 5 }, { 4, 5 } };
 
 const INT face_vertices[6][4] = { { 0, 1, 3, 2 }, { 0, 4, 5, 1 }, { 0, 2, 6, 4 }, { 6, 7, 5, 4 }, { 2, 3, 7, 6 }, { 1, 5, 7, 3 } };
 
@@ -86,7 +88,7 @@ namespace grid_gen {
     /*
      * Nothing to register for a white or black cell.
      */
-    if(m_cellEntry == NULL)
+    if (m_cellEntry == NULL)
       return;
     typename _MANIFOLD_OBJ::cMESH *facetMesh = m_manifold->Mesh();
     std::vector<iFACET> &facets = m_cellEntry->Facets();
@@ -251,7 +253,7 @@ namespace grid_gen {
     INT largestVertexIndex = m_clay.LargestVertexIndex();
 
     if (largestVertexIndex >= 8 && m_clay.LargestFacetIndex() >= 6) {
-      printf("%d\n",m_cell->Index());
+      printf("%d\n", m_cell->Index());
       //      m_cell->ExportLastEntryToOff();
       assert(0);
     }
@@ -426,17 +428,13 @@ namespace grid_gen {
   template<typename _MANIFOLD_OBJ, typename _GRID_CELL>
   VOID tCUT_CELL_BUILDER<_MANIFOLD_OBJ, _GRID_CELL>::Init() {
     BoxToMesh(m_box, m_clay);
-    iCELL_INDEX index = m_cell->Index();
 
     for (INT i = 0; i < 8; i++) {
-      INT indices[3];
-      indices[0] = vertex_enumeration[i][0];
-      indices[1] = vertex_enumeration[i][1];
-      indices[2] = vertex_enumeration[i][2];
+      INT p = vertex_enumeration[i][0];
+      INT q = vertex_enumeration[i][1];
+      INT r = vertex_enumeration[i][2];
 
-      iGRID_VERTEX vIndex(index.x + indices[0], index.y + indices[1], index.z + indices[2]);
-
-      m_clay.Vertex(i)->Color(m_manifold->Grid()->VertexColor(vIndex));
+      m_clay.Vertex(i)->Color(m_cell->VertexColor(p, q, r));
     }
   }
 
@@ -753,30 +751,28 @@ namespace grid_gen {
     cCUT_CELL_CLAY whiteClay, blackClay;
     SplitWhiteAndBlackPortions(whiteClay, blackClay);
 
-    whiteClay.ConstructManifolds();
-    blackClay.ConstructManifolds();
+    if (whiteClay.NumFacets() > 0) {
+      whiteClay.ConstructManifolds();
+      typename cCUT_CELL_CLAY::manifold_iterator currManifold = whiteClay.ManifoldsBegin();
+      typename cCUT_CELL_CLAY::manifold_iterator lastManifold = whiteClay.ManifoldsEnd();
 
-    typename cCUT_CELL_CLAY::manifold_iterator currManifold = whiteClay.ManifoldsBegin();
-    typename cCUT_CELL_CLAY::manifold_iterator lastManifold = whiteClay.ManifoldsEnd();
-
-    for (; currManifold != lastManifold; currManifold++) {
-      cCUT_CELL *cutCell = m_cellEntry ? m_cellEntry->NewCutCell() : m_cell->NewCutCell();
-      MeshFromManifold(currManifold->Index(), whiteClay, *cutCell);
+      for (; currManifold != lastManifold; currManifold++) {
+        cCUT_CELL *cutCell = m_cellEntry ? m_cellEntry->NewCutCell() : m_cell->NewCutCell();
+        MeshFromManifold(currManifold->Index(), whiteClay, *cutCell);
+      }
     }
 
-    currManifold = blackClay.ManifoldsBegin();
-    lastManifold = blackClay.ManifoldsEnd();
+    if (blackClay.NumFacets() > 0) {
+      blackClay.ConstructManifolds();
+      typename cCUT_CELL_CLAY::manifold_iterator currManifold = blackClay.ManifoldsBegin();
+      typename cCUT_CELL_CLAY::manifold_iterator lastManifold = blackClay.ManifoldsEnd();
 
-    for (; currManifold != lastManifold; currManifold++) {
-      cCUT_CELL *cutCell = m_cellEntry ? m_cellEntry->NewCutCell() : m_cell->NewCutCell();
-      MeshFromManifold(currManifold->Index(), blackClay, *cutCell);
+      for (; currManifold != lastManifold; currManifold++) {
+        cCUT_CELL *cutCell = m_cellEntry ? m_cellEntry->NewCutCell() : m_cell->NewCutCell();
+        MeshFromManifold(currManifold->Index(), blackClay, *cutCell);
+      }
     }
 
-//    if (m_debug) {
-//      printf("%d %d\n", m_clay.NumVertices(), m_clay.NumFacets());
-//      sCUT_CELL_CLAY_FILTER filter(&m_clay);
-//      ExportToOff<cCUT_CELL_CLAY, sCUT_CELL_CLAY_FILTER>("removed_black_faces.off", m_clay, filter);
-//    }
 
     //     //Extract cut-cells from the m_clay.
     BOOL retVal1 = true;

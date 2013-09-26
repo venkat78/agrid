@@ -180,7 +180,7 @@ namespace grid_gen {
 
   template<typename _MODEL_TYPE>
   BOOL tGRID_GENERATOR<_MODEL_TYPE>::StitchCutCells(std::vector<cGRID_CELL*> &processedCells, cVOLUMETRIC_GRID *grid) {
-    cCUT_CELLS_ADHESIVE adhesive;
+    cCUT_CELLS_ADHESIVE adhesive(m_bounds, grid);
     typename std::vector<cGRID_CELL*>::iterator currCell = processedCells.begin();
     typename std::vector<cGRID_CELL*>::iterator lastCell = processedCells.end();
 

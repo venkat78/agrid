@@ -134,33 +134,35 @@ namespace base_grid {
     cGRID_CELL_COLORS::iterator lastPos = m_cellColors.end();
 
     for (; currPos != lastPos; currPos++) {
-      if (currPos->second == WHITE) {
+      if (currPos->second != GRAY) {
         iCELL_INDEX cellIndex = currPos->first;
 
         for (INT i = 0; i < 2; i++) {
           for (INT j = 0; j < 2; j++) {
             for (INT k = 0; k < 2; k++) {
               iGRID_VERTEX vIndex(cellIndex.x + i, cellIndex.y + j, cellIndex.z + k);
-              m_vertexColors[vIndex] = WHITE;
+              m_vertexColors[vIndex] = currPos->second;
             }
           }
         }
       }
     }
 
-    //Mark black vertices.
     currPos = m_cellColors.begin();
     lastPos = m_cellColors.end();
 
     for (; currPos != lastPos; currPos++) {
-      if (currPos->second == BLACK) {
+      if (currPos->second == GRAY) {
         iCELL_INDEX cellIndex = currPos->first;
-
+        _GRID_ELT *cell = CoarseElement(cellIndex);
         for (INT i = 0; i < 2; i++) {
           for (INT j = 0; j < 2; j++) {
             for (INT k = 0; k < 2; k++) {
               iGRID_VERTEX vIndex(cellIndex.x + i, cellIndex.y + j, cellIndex.z + k);
-              m_vertexColors[vIndex] = BLACK;
+              cGRID_CELL_COLORS::iterator itr = m_vertexColors.find(vIndex);
+              if(itr != m_vertexColors.end())
+                cell->VertexColor(itr->second, i, j, k);
+
             }
           }
         }

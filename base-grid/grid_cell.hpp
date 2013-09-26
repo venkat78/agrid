@@ -107,6 +107,9 @@ namespace base_grid {
       tGRID_CELL()
           : m_color(UNKNOWN),
             m_index(-1) {
+        m_vertexColors[0][0][0] = m_vertexColors[0][0][1] = m_vertexColors[0][1][0] = m_vertexColors[0][1][1] = m_vertexColors[1][0][0] =
+            m_vertexColors[1][0][1] = m_vertexColors[1][1][0] = m_vertexColors[1][1][1] = UNKNOWN;
+
       }
 
       ~tGRID_CELL() {
@@ -156,15 +159,30 @@ namespace base_grid {
       eCELL_COLOR Color() const {
         return m_color;
       }
+      VOID VertexColor(eCELL_COLOR color, INT i, INT j, INT k) {
+        m_vertexColors[i][j][k] = color;
+      }
+
+      eCELL_COLOR VertexColor(INT i, INT j, INT k) {
+        return m_vertexColors[i][j][k];
+      }
 
       VOID Color(eCELL_COLOR color) {
         m_color = color;
+        if (color != GRAY) {
+          m_vertexColors[0][0][0] = m_vertexColors[0][0][1] = m_vertexColors[0][1][0] = m_vertexColors[0][1][1] = m_vertexColors[1][0][0] =
+              m_vertexColors[1][0][1] = m_vertexColors[1][1][0] = m_vertexColors[1][1][1] = color;
+        }
       }
      public:
       typedef std::vector<cCUT_CELL*>::iterator cut_cell_iterator;
 
-      cut_cell_iterator CutCellsBegin() { return m_cutCells.begin(); }
-      cut_cell_iterator CutCellsEnd() { return m_cutCells.end(); }
+      cut_cell_iterator CutCellsBegin() {
+        return m_cutCells.begin();
+      }
+      cut_cell_iterator CutCellsEnd() {
+        return m_cutCells.end();
+      }
 
       std::vector<cCUT_CELL*>& CutCells() {
         return m_cutCells;
@@ -179,6 +197,7 @@ namespace base_grid {
       std::vector<cCUT_CELL*> m_cutCells;
       cBOX3 m_box;
       eCELL_COLOR m_color;
+      eCELL_COLOR m_vertexColors[2][2][2];
   };
 
 }
