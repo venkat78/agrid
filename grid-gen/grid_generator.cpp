@@ -192,17 +192,21 @@ namespace grid_gen {
         typename cGRID_CELL::cENTRY::cut_cell_iterator currCutCell = (*entry)->CutCellsBegin();
         typename cGRID_CELL::cENTRY::cut_cell_iterator lastCutCell = (*entry)->CutCellsEnd();
         for (; currCutCell != lastCutCell; currCutCell++) {
-          (*currCutCell)->Close();
-          adhesive.Add(*(*currCutCell));
-          numCutCells++;
+          if ((*currCutCell)->IsBlack()) {
+            (*currCutCell)->Close();
+            adhesive.Add(*(*currCutCell));
+            numCutCells++;
+          }
         }
       } else {
         typename cGRID_CELL::cENTRY::cut_cell_iterator currCutCell = (*currCell)->CutCellsBegin();
         typename cGRID_CELL::cENTRY::cut_cell_iterator lastCutCell = (*currCell)->CutCellsEnd();
         for (; currCutCell != lastCutCell; currCutCell++) {
-          (*currCutCell)->Close();
-          adhesive.Add(*(*currCutCell));
-          numCutCells++;
+          if ((*currCutCell)->IsBlack()) {
+            (*currCutCell)->Close();
+            adhesive.Add(*(*currCutCell));
+            numCutCells++;
+          }
         }
       }
     }

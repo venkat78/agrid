@@ -9,8 +9,7 @@
 #include "defs.hpp"
 #include "generic_model_grid_defs.hpp"
 
-VOID test_generic_model_box(char *file)
-
+VOID test_generic_model_sphere(char *file)
 {
   cGENERIC_MODEL model;
 
@@ -55,7 +54,7 @@ VOID test_generic_model_box(char *file)
    sVOLUMETRIC_GRID_BOUNDARY_FILTER>("bfacesMesh.off", vGrid, filter);
 }
 
-int main(int argc, char **argv) {
-  test_generic_model_box(argv[1]);
-}
+//int main(int argc, char **argv) {
+//  test_generic_model_sphere(argv[1]);
+//}
 

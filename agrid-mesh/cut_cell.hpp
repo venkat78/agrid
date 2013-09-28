@@ -109,7 +109,7 @@ class tCUT_CELL : public tMESH<_Mesh_Entities, _Storage_Policy, _Object_Factory>
     _TMESH_ENTITIES(cBASE);
 
     public:
-    tCUT_CELL() : cBASE()
+    tCUT_CELL() : cBASE(), m_color(UNKNOWN)
     {}
 
     ~tCUT_CELL() {}
@@ -321,6 +321,24 @@ class tCUT_CELL : public tMESH<_Mesh_Entities, _Storage_Policy, _Object_Factory>
 
       return hasInputSurface;
     }
+
+    eCELL_COLOR Color() {
+      return m_color;
+    }
+
+    VOID Color(eCELL_COLOR color) {
+      m_color = color;
+    }
+
+    BOOL IsBlack() {
+      return m_color == BLACK ? true : false;
+    }
+
+    BOOL IsWhite() {
+      return m_color == WHITE ? true : false;
+    }
+    private:
+    eCELL_COLOR m_color;
 
   };
 

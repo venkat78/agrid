@@ -758,6 +758,7 @@ namespace grid_gen {
 
       for (; currManifold != lastManifold; currManifold++) {
         cCUT_CELL *cutCell = m_cellEntry ? m_cellEntry->NewCutCell() : m_cell->NewCutCell();
+        cutCell->Color(WHITE);
         MeshFromManifold(currManifold->Index(), whiteClay, *cutCell);
       }
     }
@@ -769,10 +770,10 @@ namespace grid_gen {
 
       for (; currManifold != lastManifold; currManifold++) {
         cCUT_CELL *cutCell = m_cellEntry ? m_cellEntry->NewCutCell() : m_cell->NewCutCell();
+        cutCell->Color(BLACK);
         MeshFromManifold(currManifold->Index(), blackClay, *cutCell);
       }
     }
-
 
     //     //Extract cut-cells from the m_clay.
     BOOL retVal1 = true;
