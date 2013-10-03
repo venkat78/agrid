@@ -21,9 +21,18 @@ namespace grid_gen {
   }
 
   template<typename _GRID_TYPE, typename _GRID_CELL>
+  VOID tSUB_DIVIDE<_GRID_TYPE, _GRID_CELL>::Clip() {
+    INT facetIndices[6] = {0, 1, 2, 3, 4, 5};
+    REAL val = m_box.Center()[m_coord];
+
+    for(INT i = 0; i < 6; i++)
+      tMESH_CLIPPER<cCUT_CELL_CLAY>(m_clay).Clip(i, m_coord, val);
+  }
+
+  template<typename _GRID_TYPE, typename _GRID_CELL>
   BOOL tSUB_DIVIDE<_GRID_TYPE, _GRID_CELL>::Do() {
     Init();
-
+    Clip();
 
   }
 } /* namespace grid_gen */

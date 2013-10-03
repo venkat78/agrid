@@ -29,6 +29,7 @@ namespace grid_gen {
 
      private:
       VOID Init();
+      VOID Clip();
      private:
       _GRID_TYPE *m_grid;
       _GRID_CELL *m_cell;
