@@ -1,23 +1,5 @@
 #include "cut_cell_builder.hpp"
 
-/*
- * A cBOX3 topology enumeration.
- * Should be moved out of here at a later time.
- */
-const INT vertex_face_incidence[8][3] = { { 0, 1, 2 }, { 0, 1, 5 }, { 0, 2, 4 }, { 0, 5, 5 }, { 1, 2, 3 }, { 1, 3, 5 }, { 2, 3, 4 }, { 3, 4, 5 } };
-
-//This is to store tuples info
-//for box vertices
-const INT vertex_enumeration[8][3] = { { 0, 0, 0 }, { 0, 0, 1 }, { 0, 1, 0 }, { 0, 1, 1 }, { 1, 0, 0 }, { 1, 0, 1 }, { 1, 1, 0 }, { 1, 1, 1 }, };
-
-const INT edge_vertices[12][2] = { { 0, 1 }, { 0, 2 }, { 0, 4 }, { 1, 3 }, { 1, 5 }, { 2, 3 }, { 2, 6 }, { 4, 5 }, { 4, 6 }, { 7, 6 }, { 7, 5 }, { 7,
-    3 } };
-
-const INT edge_faces[12][2] =
-    { { 0, 1 }, { 0, 2 }, { 1, 2 }, { 0, 5 }, { 1, 5 }, { 0, 4 }, { 2, 4 }, { 1, 3 }, { 2, 3 }, { 3, 4 }, { 3, 5 }, { 4, 5 } };
-
-const INT face_vertices[6][4] = { { 0, 1, 3, 2 }, { 0, 4, 5, 1 }, { 0, 2, 6, 4 }, { 6, 7, 5, 4 }, { 2, 3, 7, 6 }, { 1, 5, 7, 3 } };
-
 namespace grid_gen {
 //  BOOL tCUT_CELL_BUILDER<_MANIFOLD_OBJ, _GRID_CELL>::m_debug = false;
 

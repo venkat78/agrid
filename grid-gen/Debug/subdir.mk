@@ -7,19 +7,22 @@ CPP_SRCS += \
 ../cut_cell_builder.cpp \
 ../cut_cells_adhesive.cpp \
 ../grid_gen.cpp \
-../grid_generator.cpp 
+../grid_generator.cpp \
+../subdivide.cpp 
 
 OBJS += \
 ./cut_cell_builder.o \
 ./cut_cells_adhesive.o \
 ./grid_gen.o \
-./grid_generator.o 
+./grid_generator.o \
+./subdivide.o 
 
 CPP_DEPS += \
 ./cut_cell_builder.d \
 ./cut_cells_adhesive.d \
 ./grid_gen.d \
-./grid_generator.d 
+./grid_generator.d \
+./subdivide.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

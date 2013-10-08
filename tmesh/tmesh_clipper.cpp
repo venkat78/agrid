@@ -284,7 +284,7 @@ namespace tmesh {
         v[i++] = currHe->Tail()->Index();
       else if (diff1 * diff2 > 0.0) {
         cPOINT3 newPoint = ((tailPoint * diff2) + (headPoint * diff1)) / (diff1 + diff2);
-        v[i++] = m_mesh->AddVertex(newPoint);
+        v[i++] = m_mesh->NewVertex(newPoint);
         facetHes[i - 1] = currHe;
         verticesAreNew[i - 1] = true;
       }

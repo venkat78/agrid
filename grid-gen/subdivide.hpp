@@ -28,15 +28,14 @@ namespace grid_gen {
       BOOL Do();
 
      private:
-      VOID Init();
-      VOID Clip();
+      VOID Split(cCUT_CELL_CLAY &bigCellClay, cCUT_CELL_CLAY children[2]);
+      VOID Split(INT facetIndex, std::vector<bool> &visitedFacets, cCUT_CELL_CLAY &parentClay, cCUT_CELL_CLAY &childClay);
+      VOID VerticesColor(cCUT_CELL_CLAY &parentClay, cCUT_CELL_CLAY &childClay);
      private:
       _GRID_TYPE *m_grid;
       _GRID_CELL *m_cell;
       eCOORD m_coord;
       cBOX3 m_box;
-      cCUT_CELL_CLAY m_clay;
   };
-
 } /* namespace grid_gen */
 #endif /* SUBDIVIDE_HPP_ */

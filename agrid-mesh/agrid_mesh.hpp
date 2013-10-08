@@ -12,6 +12,7 @@
 #include "cut_cell.hpp"
 #include "volumetric_grid.hpp"
 #include "vol_grid_queries.hpp"
+#include "close_cell.hpp"
 //#include "planar_cutter.hpp"
 
 #endif /* AGRID_MESH_HPP_ */

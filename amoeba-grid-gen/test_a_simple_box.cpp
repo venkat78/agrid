@@ -56,6 +56,22 @@ VOID test_generic_model_box(char *file)
 }
 
 int main(int argc, char **argv) {
-  test_generic_model_box(argv[1]);
+//  test_generic_model_box(argv[1]);
+  cSURFACE_MESH mesh;
+  cBOX3 box(cPOINT3(0, 0, 0), cPOINT3(2, 2, 2));
+  REAL val = box.Center()[GEOM_X];
+  BoxToMesh(box, mesh);
+
+  FILE *fp = fopen("before_clipping.off", "wb+");
+  ExportToOff(fp, mesh);
+  fclose(fp);
+
+  for(INT i = 0; i < 6; i++)
+    tMESH_CLIPPER<cSURFACE_MESH>(&mesh).Clip(i, GEOM_X, 0.5);
+
+  fp = fopen("after_clipping.off", "wb+");
+  ExportToOff(fp, mesh);
+  fclose(fp);
+
 }
 
