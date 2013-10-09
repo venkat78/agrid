@@ -87,6 +87,7 @@ namespace base_grid {
         return m_cutCells;
       }
 
+      VOID Clip(eCOORD coord, REAL val);
      private:
       cMANIFOLD_RECORD *m_record;
       std::vector<cCUT_CELL*> m_cutCells;

@@ -104,6 +104,11 @@ namespace grid_gen {
         }
       }
     }
+  }
+
+  template<typename _GRID_TYPE, typename _GRID_CELL>
+  VOID tSUB_DIVIDE<_GRID_TYPE, _GRID_CELL>::ClipManifolds()
+  {
 
   }
 }
