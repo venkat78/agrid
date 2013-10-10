@@ -29,10 +29,18 @@ namespace grid_gen {
     for (INT i = 0; i < 6; i++)
       tMESH_CLIPPER<cCUT_CELL_CLAY>(&bigCellClay).Clip(i, m_coord, val);
 
+    //Split big cell box into small boxes.
     cCUT_CELL_CLAY childClay[2];
     Split(bigCellClay, childClay);
-    return true;
 
+    //Clip all facets.
+    m_cell->Clip(m_coord, val);
+    _GRID_CELL *childCell1 = m_grid->AddCell();
+    _GRID_CELL *childCell2 = m_grid->AddCell();
+    childCell1->Box(childClay[0].BoundingBox());
+    childCell2->Box(childClay[1].BoundingBox());
+
+    return true;
   }
 
   template<typename _GRID_TYPE, typename _GRID_CELL>
@@ -106,10 +114,5 @@ namespace grid_gen {
     }
   }
 
-  template<typename _GRID_TYPE, typename _GRID_CELL>
-  VOID tSUB_DIVIDE<_GRID_TYPE, _GRID_CELL>::ClipManifolds()
-  {
-
-  }
 }
 /* namespace grid_gen */

@@ -37,6 +37,11 @@ namespace base_grid {
         return elt;
       }
 
+      _GRID_ELT* AddCell()
+      {
+        return m_factory.NewElement();
+      }
+
       /*
        * Geometric properties of coarse level grid.
        */

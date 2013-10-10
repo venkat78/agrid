@@ -168,6 +168,7 @@ namespace base_grid {
         return m_vertexColors[i][j][k];
       }
 
+      VOID Clip(eCOORD coord, REAL val);
       VOID Color(eCELL_COLOR color) {
         m_color = color;
         if (color != GRAY) {

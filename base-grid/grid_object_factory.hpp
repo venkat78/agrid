@@ -31,6 +31,13 @@ class tGRID_OBJECT_FACTORY {
     return newElement;
   }
 
+  _ELT_TYPE* NewElement() {
+    _ELT_TYPE *newElement = m_elements.new_object();
+    INT localIndex = m_elements.size() - 1;
+    newElement->Index(localIndex);
+    return newElement;
+  }
+
  private:
   cMAP m_coarseMap;
   tTABLE<_ELT_TYPE> m_elements;

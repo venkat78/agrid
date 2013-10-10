@@ -41,4 +41,12 @@ namespace base_grid {
     m_color = GRAY;
   }
 
+  template<typename _MESH_TYPE>
+  VOID tGRID_CELL<_MESH_TYPE>::Clip(eCOORD coord, REAL val) {
+    INT numEntries = m_entries.size();
+
+    for (INT i = 0; i < numEntries; i++)
+      m_entries[i]->Clip(coord, val);
+  }
+
 }
