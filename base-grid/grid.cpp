@@ -9,8 +9,8 @@
 
 namespace base_grid {
 
-  template<typename _GRID_ELT>
-  tGRID<_GRID_ELT>::tGRID(const cBOX3 &bounds, INT numCells[3]) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::tGRID(const cBOX3 &bounds, INT numCells[3]) {
     m_bounds = bounds;
 
     INT nCells = (REAL) (numCells[0] * numCells[1] * numCells[2]);
@@ -22,16 +22,16 @@ namespace base_grid {
     }
   }
 
-  template<typename _GRID_ELT>
-  tGRID<_GRID_ELT>::tGRID(const cBOX3 &bounds, INT numCells) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::tGRID(const cBOX3 &bounds, INT numCells) {
     INT numGridCells[3];
     for (INT i = 0; i < 3; i++)
       numGridCells[i] = numCells;
     tGRID(bounds, numGridCells);
   }
 
-  template<typename _GRID_ELT>
-  iCELL_INDEX tGRID<_GRID_ELT>::CellIndex(const cPOINT3 &point) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  iCELL_INDEX tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::CellIndex(const cPOINT3 &point) {
     UINT index[3];
     DO_COORDS(coord)
     {
@@ -43,8 +43,8 @@ namespace base_grid {
   }
 
 //normal is used to resolve borderline cases
-  template<typename _GRID_ELT>
-  INT tGRID<_GRID_ELT>::ModifiedCellIndex(const cPOINT3 &point, cVECTOR3 normal, iCELL_INDEX indices[2]) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  INT tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::ModifiedCellIndex(const cPOINT3 &point, cVECTOR3 normal, iCELL_INDEX indices[2]) {
     INT index[3];
 
     BOOL onGridPlane = false;
@@ -68,13 +68,13 @@ namespace base_grid {
     return numIndices;
   }
 
-  template<typename _GRID_ELT>
-  iCELL_INDEX tGRID<_GRID_ELT>::CellIndex(REAL x, REAL y, REAL z) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  iCELL_INDEX tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::CellIndex(REAL x, REAL y, REAL z) {
     return CellIndex(cPOINT3(x, y, z));
   }
 
-  template<typename _GRID_ELT>
-  cBOX3 tGRID<_GRID_ELT>::CellBox(iCELL_INDEX cellIndex) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  cBOX3 tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::CellBox(iCELL_INDEX cellIndex) {
     INT coordIndex[3];
 
     coordIndex[0] = cellIndex.x;
@@ -93,22 +93,22 @@ namespace base_grid {
     return cellBox;
   }
 
-  template<typename _GRID_ELT>
-  REAL tGRID<_GRID_ELT>::CellUpperBound(REAL val, eCOORD coord) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  REAL tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::CellUpperBound(REAL val, eCOORD coord) {
     REAL h = m_bounds.Thickness(coord) / ((REAL) m_numCells[coord]);
     INT index = (INT) ((val - m_bounds.MinCoord(coord)) / h) + 1;
     return m_bounds.MinCoord(coord) + (index * h);
   }
 
-  template<typename _GRID_ELT>
-  REAL tGRID<_GRID_ELT>::CellLowerBound(REAL val, eCOORD coord) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  REAL tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::CellLowerBound(REAL val, eCOORD coord) {
     REAL h = m_bounds.Thickness(coord) / ((REAL) m_numCells[coord]);
     INT index = (INT) ((val - m_bounds.MinCoord(coord)) / h);
     return m_bounds.MinCoord(coord) + (index * h);
   }
 
-  template<typename _GRID_ELT>
-  eCELL_COLOR tGRID<_GRID_ELT>::CellColor(iCELL_INDEX index) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  eCELL_COLOR tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::CellColor(iCELL_INDEX index) {
     cGRID_CELL_COLORS::iterator pos = m_cellColors.find(index);
 
     if (pos == m_cellColors.end())
@@ -117,8 +117,8 @@ namespace base_grid {
     return pos->second;
   }
 
-  template<typename _GRID_ELT>
-  eCELL_COLOR tGRID<_GRID_ELT>::VertexColor(iGRID_VERTEX index) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  eCELL_COLOR tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::VertexColor(iGRID_VERTEX index) {
     cGRID_VERTEX_COLORS::iterator pos = m_vertexColors.find(index);
 
     if (pos == m_vertexColors.end())
@@ -127,8 +127,8 @@ namespace base_grid {
     return pos->second;
   }
 
-  template<typename _GRID_ELT>
-  VOID tGRID<_GRID_ELT>::CollectWhiteAndBlackVertices() {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  VOID tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::CollectWhiteAndBlackVertices() {
     //Mark white vertices.
     cGRID_CELL_COLORS::iterator currPos = m_cellColors.begin();
     cGRID_CELL_COLORS::iterator lastPos = m_cellColors.end();
@@ -171,8 +171,8 @@ namespace base_grid {
 
   }
 
-  template<typename _GRID_ELT>
-  VOID tGRID<_GRID_ELT>::AddToFront(eCELL_COLOR sourceCellColor, iCELL_INDEX index, std::vector<iCELL_INDEX> &front,
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  VOID tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::AddToFront(eCELL_COLOR sourceCellColor, iCELL_INDEX index, std::vector<iCELL_INDEX> &front,
                                     cGRID_CELL_MARKS &alreadyVisited) {
     if (!IsValid(index))
       return;
@@ -201,8 +201,8 @@ namespace base_grid {
     }
   }
 
-  template<typename _GRID_ELT>
-  VOID tGRID<_GRID_ELT>::AdvancingFront(std::vector<iCELL_INDEX> &front, cGRID_CELL_MARKS &alreadyVisited) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  VOID tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::AdvancingFront(std::vector<iCELL_INDEX> &front, cGRID_CELL_MARKS &alreadyVisited) {
     //Z-min, max cells.
     INT i = 0, j = 0;
     for (; i < NumCells(GEOM_X); i++) {
@@ -231,8 +231,8 @@ namespace base_grid {
     }
   }
 
-  template<typename _GRID_ELT>
-  VOID tGRID<_GRID_ELT>::MarkBlackCells(cGRID_CELL_MARKS &visitedCells) {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  VOID tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::MarkBlackCells(cGRID_CELL_MARKS &visitedCells) {
     for (INT i = 0; i < m_numCells[0]; i++) {
       for (INT j = 0; j < m_numCells[1]; j++) {
         for (INT k = 0; k < m_numCells[2]; k++) {
@@ -246,8 +246,8 @@ namespace base_grid {
     }
   }
 
-  template<typename _GRID_ELT>
-  VOID tGRID<_GRID_ELT>::FlipColors() {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  VOID tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::FlipColors() {
     typename cGRID_CELL_COLORS::iterator curr = m_cellColors.begin();
     typename cGRID_CELL_COLORS::iterator last = m_cellColors.end();
 
@@ -273,8 +273,8 @@ namespace base_grid {
    *  2. The outer layer of cells are assumed to be WHITE.
    *  3. Keep walking until all white cells are visited.
    */
-  template<typename _GRID_ELT>
-  VOID tGRID<_GRID_ELT>::FloodFill() {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  VOID tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::FloodFill() {
     std::vector<iCELL_INDEX> front;
     cGRID_CELL_MARKS alreadyVisited;
 
@@ -311,8 +311,8 @@ namespace base_grid {
     CollectWhiteAndBlackVertices();
   }
 
-  template<typename _GRID_ELT>
-  VOID tGRID<_GRID_ELT>::CreateBlackAndWhiteGridCells() {
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY>
+  VOID tGRID<_GRID_ELT, _GRID_STORAGE_POLICY>::CreateBlackAndWhiteGridCells() {
     typename cGRID_CELL_COLORS::iterator curr = m_cellColors.begin();
     typename cGRID_CELL_COLORS::iterator last = m_cellColors.end();
 

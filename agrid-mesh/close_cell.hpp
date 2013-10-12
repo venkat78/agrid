@@ -10,7 +10,7 @@
 
 #include "defs.hpp"
 template<typename _CELL_TYPE>
-BOOL CloseHole(_CELL_TYPE *cell, std::vector<iVERTEX> &cycleVertices) {
+BOOL CloseCell(_CELL_TYPE *cell, std::vector<iVERTEX> &cycleVertices) {
   //The orientation in the vector is reverse.
   //Close hole in the opposite order of vertices in cycleVertices.
   INT numCycleVertices = cycleVertices.size();
@@ -75,7 +75,7 @@ BOOL CloseHole(_CELL_TYPE *cell, _HALF_EDGE *initHe) {
     std::vector<iVERTEX> cycleVertices;
     if (foundCycle) {
       CollectCycleVertices<_HALF_EDGE>(boundaryHes, cycleAtV, foundCycle, cycleVertices);
-      if (!CloseHole<_CELL_TYPE, _HALF_EDGE>(cell,cycleVertices))
+      if (!CloseCell<_CELL_TYPE>(cell,cycleVertices))
         return false;
 
       if (!boundaryHes.empty()) {
@@ -90,7 +90,7 @@ BOOL CloseHole(_CELL_TYPE *cell, _HALF_EDGE *initHe) {
     else {
       //Hole is a simple loop.
       CollectCycleVertices<_HALF_EDGE>(boundaryHes, INVALID_IVERTEX, foundCycle, cycleVertices);
-      if (!CloseHole<_CELL_TYPE, _HALF_EDGE>(cell,cycleVertices))
+      if (!CloseCell<_CELL_TYPE>(cell,cycleVertices))
         return false;
 
       cyclesLeft = false;
@@ -116,7 +116,7 @@ typename _CELL_TYPE::cHALF_EDGE* BoundaryEdge(_CELL_TYPE *cell) {
 
 template<typename _CELL_TYPE>
 BOOL Close(_CELL_TYPE *cell) {
-  typename _CELL_TYPE::cHALF_EDGE cHALF_EDGE;
+  typedef typename _CELL_TYPE::cHALF_EDGE cHALF_EDGE;
   while (true) {
     //Find an open boundary and close it by a new facet.
     typename _CELL_TYPE::cHALF_EDGE *boundaryHalfEdge = BoundaryEdge<_CELL_TYPE>(cell);

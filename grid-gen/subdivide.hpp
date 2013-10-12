@@ -13,6 +13,7 @@ namespace grid_gen {
 
   template<typename _GRID_TYPE, typename _GRID_CELL>
   class tSUB_DIVIDE {
+      typedef typename _GRID_CELL::cENTRY cGRID_ENTRY;
      public:
       tSUB_DIVIDE(_GRID_TYPE *grid = NULL, _GRID_CELL *cell = NULL, eCOORD coord = GEOM_COORD_NONE)
           : m_grid(grid),
@@ -31,6 +32,9 @@ namespace grid_gen {
       VOID Split(cCUT_CELL_CLAY &bigCellClay, cCUT_CELL_CLAY children[2]);
       VOID Split(INT facetIndex, std::vector<bool> &visitedFacets, cCUT_CELL_CLAY &parentClay, cCUT_CELL_CLAY &childClay);
       VOID VerticesColor(cCUT_CELL_CLAY &parentClay, cCUT_CELL_CLAY &childClay);
+      VOID DistributeManifolds(_GRID_CELL *parentCell, _GRID_CELL *leftChild, _GRID_CELL *rightChild);
+      VOID DistributeManifold(cGRID_ENTRY *entry, _GRID_CELL *leftChild, _GRID_CELL *rightChild);
+
      private:
       _GRID_TYPE *m_grid;
       _GRID_CELL *m_cell;

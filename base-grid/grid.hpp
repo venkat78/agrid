@@ -6,8 +6,13 @@
 #include "grid_cell.hpp"
 
 namespace base_grid {
+  struct sGRID_STORAGE_POLICY {
+    static const INT numObjectsInPage = 512;
+    static const INT logOfObjectsInPage = 9;
+    static const INT numInitialPages = 512;
+  };
 
-  template<typename _GRID_ELT>
+  template<typename _GRID_ELT, typename _GRID_STORAGE_POLICY = sGRID_STORAGE_POLICY>
   class tGRID {
      public:
       /*
@@ -154,7 +159,7 @@ namespace base_grid {
       }
 
      private:
-      tGRID_OBJECT_FACTORY<_GRID_ELT> m_factory;
+      tGRID_OBJECT_FACTORY<_GRID_ELT, _GRID_STORAGE_POLICY> m_factory;
       INT m_numCells[3];
       REAL m_cellSize[3];
 

@@ -8,7 +8,7 @@ namespace base_grid {
     _MESH_TYPE *mesh = m_record->Mesh();
     while (i < m_facets.size()) {
       iFACET oldLargestFacetIndex = mesh->LargestFacetIndex();
-      tMESH_CLIPPER<_MESH_TYPE>(mesh).Clip(m_facets[i], coord, val);
+      iFACET newIndex = tMESH_CLIPPER<_MESH_TYPE>(mesh).Clip(m_facets[i], coord, val);
 
       iFACET newLargestFacetIndex = mesh->LargestFacetIndex();
 

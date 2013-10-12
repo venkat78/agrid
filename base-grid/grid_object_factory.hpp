@@ -4,9 +4,17 @@
 #include "defs.hpp"
 
 namespace base_grid {
-template<typename _ELT_TYPE>
+template<typename _ELT_TYPE, typename _GRID_STORAGE_POLICY>
 class tGRID_OBJECT_FACTORY {
   typedef __gnu_cxx::hash_map<sINDEX, _ELT_TYPE*, sINDEX_HASH_FCN> cMAP;
+ public:
+  tGRID_OBJECT_FACTORY() : m_elements(_GRID_STORAGE_POLICY::numObjectsInPage,
+                                      _GRID_STORAGE_POLICY::logOfObjectsInPage,
+                                      _GRID_STORAGE_POLICY::numInitialPages, 0)
+ {
+
+ }
+  //Constructor
  public:
   _ELT_TYPE* GetElement(INT index) {
     return m_elements.object_at(index);

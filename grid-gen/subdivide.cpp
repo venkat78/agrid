@@ -20,7 +20,7 @@ namespace grid_gen {
       INT q = vertex_enumeration[i][1];
       INT r = vertex_enumeration[i][2];
 
-      bigCellClay.Vertex(i)->Color(m_cell->Color(p, q, r));
+      bigCellClay.Vertex(i)->Color(m_cell->VertexColor(p, q, r));
     }
 
     //Imprint mid plane in big cell clay.
@@ -35,12 +35,31 @@ namespace grid_gen {
 
     //Clip all facets.
     m_cell->Clip(m_coord, val);
+
     _GRID_CELL *childCell1 = m_grid->AddCell();
     _GRID_CELL *childCell2 = m_grid->AddCell();
+
     childCell1->Box(childClay[0].BoundingBox());
     childCell2->Box(childClay[1].BoundingBox());
 
+    DistributeManifolds(m_cell, childCell1, childCell2);
     return true;
+  }
+
+  template<typename _GRID_TYPE, typename _GRID_CELL>
+  VOID tSUB_DIVIDE<_GRID_TYPE, _GRID_CELL>::DistributeManifolds(_GRID_CELL *parentCell, _GRID_CELL *leftCell, _GRID_CELL *rightCell) {
+    typename _GRID_CELL::entry_iterator currEntryItr = parentCell->begin();
+    typename _GRID_CELL::entry_iterator lastEntryItr = parentCell->end();
+
+    for( ; currEntryItr != lastEntryItr ; currEntryItr++) {
+      DistributeManifold(currEntryItr.operator*(), leftCell, rightCell);
+    }
+
+  }
+
+  template<typename _GRID_TYPE, typename _GRID_CELL>
+  VOID tSUB_DIVIDE<_GRID_TYPE, _GRID_CELL>::DistributeManifold(cGRID_ENTRY *entry, _GRID_CELL *leftCell, _GRID_CELL *rightCell) {
+
   }
 
   template<typename _GRID_TYPE, typename _GRID_CELL>

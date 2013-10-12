@@ -12,7 +12,7 @@
 #include "model_defn_to_grid_defn.hpp"
 #include "cut_cell_builder.hpp"
 #include "grid_generator.hpp"
-
+#include "subdivide.hpp"
 
 
 #endif /* GRID_GEN_HPP_ */
