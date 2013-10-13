@@ -7,13 +7,15 @@
 
 #include "defs.hpp"
 #include "amoeba_grid_defs.hpp"
+#include "tmesh.cpp"
 #include "base_grid.cpp"
 #include "grid_gen.cpp"
 
-typedef cDEFINE_AMOEBA_MODEL_GRID::cGRID_CELL cAMOEBA_GRID_CELL;
-typedef cDEFINE_AMOEBA_MODEL_GRID::cMESH cAMOEBA_MESH;
-typedef cDEFINE_AMOEBA_MODEL_GRID::cMANIFOLD_OBJ cMANIFOLD_OBJ;
+typedef typename cDEFINE_AMOEBA_MODEL_GRID::cGRID_CELL cAMOEBA_GRID_CELL;
+typedef typename cDEFINE_AMOEBA_MODEL_GRID::cMESH cAMOEBA_MESH;
+typedef typename cDEFINE_AMOEBA_MODEL_GRID::cMANIFOLD_OBJ cMANIFOLD_OBJ;
 
+GEN_MESH_CLIPPER(cAMOEBA_MESH);
 template class tCUT_CELL_BUILDER<cMANIFOLD_OBJ, cAMOEBA_GRID_CELL>;
 template class tGRID_CELL<cAMOEBA_MESH>;
 template class tGRID<cAMOEBA_GRID_CELL> ;

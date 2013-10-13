@@ -7,15 +7,16 @@
 
 #include "defs.hpp"
 #include "generic_model_grid_defs.hpp"
+#include "tmesh.cpp"
 #include "base_grid.cpp"
 #include "grid_gen.cpp"
 
-typedef cDEFINE_GENERIC_MODEL_GRID::cGRID_CELL cGENERIC_MODEL_GRID_CELL;
-typedef cDEFINE_GENERIC_MODEL_GRID::cMESH cGENERIC_MESH;
-typedef cDEFINE_GENERIC_MODEL_GRID::cMANIFOLD_OBJ cMANIFOLD_OBJ;
-typedef cDEFINE_GENERIC_MODEL_GRID::cGRID cGENERIC_MODEL_GRID;
+typedef typename cDEFINE_GENERIC_MODEL_GRID::cGRID_CELL cGENERIC_MODEL_GRID_CELL;
+typedef typename cDEFINE_GENERIC_MODEL_GRID::cMESH cGENERIC_MESH;
+typedef typename cDEFINE_GENERIC_MODEL_GRID::cMANIFOLD_OBJ cMANIFOLD_OBJ;
+typedef typename cDEFINE_GENERIC_MODEL_GRID::cGRID cGENERIC_MODEL_GRID;
 
-template class tMESH_CLIPPER<cGENERIC_MESH>;
+template class tMESH_CLIPPER< cGENERIC_MESH >;
 
 template class tCUT_CELL_BUILDER<cMANIFOLD_OBJ, cGENERIC_MODEL_GRID_CELL>;
 template class tGRID_CELL<cGENERIC_MESH>;
