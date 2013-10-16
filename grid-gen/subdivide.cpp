@@ -51,7 +51,7 @@ namespace grid_gen {
     typename _GRID_CELL::entry_iterator currEntryItr = parentCell->begin();
     typename _GRID_CELL::entry_iterator lastEntryItr = parentCell->end();
 
-    for( ; currEntryItr != lastEntryItr ; currEntryItr++) {
+    for (; currEntryItr != lastEntryItr; currEntryItr++) {
       DistributeManifold(currEntryItr.operator*(), leftCell, rightCell);
     }
 
@@ -59,7 +59,41 @@ namespace grid_gen {
 
   template<typename _GRID_TYPE, typename _GRID_CELL>
   VOID tSUB_DIVIDE<_GRID_TYPE, _GRID_CELL>::DistributeManifold(cGRID_ENTRY *entry, _GRID_CELL *leftCell, _GRID_CELL *rightCell) {
+    struct sLOCAL_GRID_STORAGE_POLICY {
+        static const INT numObjectsInPage = 2;
+        static const INT logOfObjectsInPage = 1;
+        static const INT numInitialPages = 2;
+    };
 
+    typedef tGRID<_GRID_CELL, sLOCAL_GRID_STORAGE_POLICY> cSMALL_GRID;
+    INT nCells[3] = { 1, 1, 1 };
+    nCells[m_coord] = 2;
+    cSMALL_GRID localGrid(m_box, nCells);
+
+    iCELL_INDEX leftCellIndex = localGrid.CellIndex(leftCell->Box().Center());
+    iCELL_INDEX rightCellIndex = localGrid.CellIndex(rightCell->Box().Center());
+
+    std::vector<iFACET> &facets = entry->Facets();
+
+    typename std::vector<iFACET>::iterator currFacet = facets.begin();
+    typename std::vector<iFACET>::iterator lastFacet = facets.end();
+
+    typedef typename cGRID_ENTRY::cMESH cMESH;
+
+    cMESH* mesh = entry->Mesh();
+    typename cGRID_ENTRY::cMANIFOLD_RECORD *record = entry->Record();
+
+    for (; currFacet != lastFacet; currFacet++) {
+      iCELL_INDEX childIndices[2];
+      typename cMESH::cFACET *facet = mesh->Facet(*currFacet);
+      localGrid.ModifiedCellIndex(facet->MeanPoint(), facet->Normal(), cellIndices);
+
+      if (childIndices[0] == leftCellIndex) {
+        leftCell->Register(record, *currFacet);
+      } else {
+        rightCell->Register(record, *currFacet);
+      }
+    }
   }
 
   template<typename _GRID_TYPE, typename _GRID_CELL>
