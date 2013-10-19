@@ -34,7 +34,9 @@ namespace grid_gen {
       VOID VerticesColor(cCUT_CELL_CLAY &parentClay, cCUT_CELL_CLAY &childClay);
       VOID DistributeManifolds(_GRID_CELL *parentCell, _GRID_CELL *leftChild, _GRID_CELL *rightChild);
       VOID DistributeManifold(cGRID_ENTRY *entry, _GRID_CELL *leftChild, _GRID_CELL *rightChild);
-
+      VOID RegisterEntryVertices(cCUT_CELL_CLAY &clay, cGRID_ENTRY *entry);
+      VOID RegisterOnClayEdges(cCUT_CELL_CLAY &clay, const cBOX3 &clayBox, const cPOINT3 &point,
+                               iVERTEX meshVertexIndex);
      private:
       _GRID_TYPE *m_grid;
       _GRID_CELL *m_cell;

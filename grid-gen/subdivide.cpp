@@ -54,7 +54,6 @@ namespace grid_gen {
     for (; currEntryItr != lastEntryItr; currEntryItr++) {
       DistributeManifold(currEntryItr.operator*(), leftCell, rightCell);
     }
-
   }
 
   template<typename _GRID_TYPE, typename _GRID_CELL>
@@ -165,6 +164,97 @@ namespace grid_gen {
         }
       }
     }
+  }
+
+  template<typename _GRID_TYPE, typename _GRID_CELL>
+  VOID tSUB_DIVIDE<_GRID_TYPE, _GRID_CELL>::RegisterOnClayEdges(cCUT_CELL_CLAY &clay, const cBOX3 &clayBox, const cPOINT3 &point,
+                                                                iVERTEX meshVertexIndex) {
+    INT edge = clayBox.IsOnEdge(point);
+    if (edge < 0)
+      return;
+
+    INT tailIndex, headIndex, newVertexIndex;
+    tailIndex = headIndex = newVertexIndex = INVALID_IVERTEX;
+
+    ASSERT(edge >= 0 && edge < 12);
+
+    INT cellFaceIndex = edge_faces[edge][0];
+
+    cCUT_CELL_CLAY::cFACET* cellFace = clay.Facet(cellFaceIndex);
+
+    cCUT_CELL_CLAY::cFACET::half_edge_circulator currHalfEdge = cellFace->HalfEdgesBegin();
+    cCUT_CELL_CLAY::cFACET::half_edge_circulator lastHalfEdge = cellFace->HalfEdgesEnd();
+
+    for (; currHalfEdge != lastHalfEdge; currHalfEdge++) {
+      cSEGMENT3 edgeSegment = currHalfEdge->Segment();
+
+      //Found the half-edge to insert the point.
+      if (edgeSegment.HasOn(point)) {
+        INT endPointIndex = edgeSegment.IsEndPoint(point);
+        if (endPointIndex >= 0) {
+          cCUT_CELL_CLAY::cVERTEX *vertex = NULL;
+          if (endPointIndex == 0)
+            vertex = currHalfEdge->Tail();
+          else
+            vertex = currHalfEdge->Head();
+
+          if (vertex->Index() < 8) {
+            clay.Vertex(vertex->Index())->Color(GRAY);
+//            m_clay.Vertex(vertex->Index())->Source(meshVertexIndex, m_manifold->Mesh());
+          }
+
+        } else {
+          //Insert it on half-edge
+          tailIndex = currHalfEdge->Tail()->Index();
+          headIndex = currHalfEdge->Head()->Index();
+
+          newVertexIndex = clay.NewVertex(point);
+
+          ASSERT(tailIndex != INVALID_IVERTEX && headIndex != INVALID_IVERTEX && newVertexIndex != INVALID_IVERTEX);
+
+          clay.SplitEdge(newVertexIndex, tailIndex, headIndex);
+          //m_meshVertexIndices[newVertexIndex] = meshVertexIndex;
+//          m_clay.Vertex(newVertexIndex)->Source(meshVertexIndex, m_manifold->Mesh());
+        }
+
+        return;
+      }
+    }
+  }
+
+  /*
+   *  Registers facet vertices on cellMesh.
+   */
+  template<typename _GRID_TYPE, typename _GRID_CELL>
+  VOID tSUB_DIVIDE<_GRID_TYPE, _GRID_CELL>::RegisterEntryVertices(cCUT_CELL_CLAY &clay, cGRID_ENTRY *entry) {
+    /*
+     * Nothing to register for a white or black cell.
+     */
+    if (entry == NULL)
+      return;
+
+    cBOX3 clayBox = clay.BoundingBox();
+
+    typedef typename cGRID_ENTRY::cMESH cMESH;
+    cMESH *facetMesh = entry->Mesh();
+    std::vector<iFACET> &facets = entry->Facets();
+
+    std::vector<iFACET>::iterator currFacet = facets.begin();
+    std::vector<iFACET>::iterator lastFacet = facets.end();
+
+    //printf("Facets : ");
+    for (; currFacet != lastFacet; currFacet++) {
+      typename cMESH::cFACET *facet = facetMesh->Facet(*currFacet);
+      //printf("%d ", facet->Index());
+
+      typename cMESH::cFACET::vertex_circulator currVertex = facet->VerticesBegin();
+      typename cMESH::cFACET::vertex_circulator lastVertex = facet->VerticesEnd();
+
+      for (; currVertex != lastVertex; currVertex++)
+        RegisterOnClayEdges(clay, clayBox, currVertex->Point(), currVertex->Index());
+    }
+
+    //printf("\n");
   }
 
 }
