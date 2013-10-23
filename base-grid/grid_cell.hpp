@@ -13,10 +13,15 @@ namespace base_grid {
   class tGRID_CELL_ENTRY {
      public:
       typedef tMANIFOLD_RECORD<_MESH_TYPE> cMANIFOLD_RECORD;
+      typedef _MESH_TYPE cMESH;
 
      public:
       tGRID_CELL_ENTRY(cMANIFOLD_RECORD *record = NULL)
           : m_record(record) {
+      }
+
+      cMESH *Mesh() {
+        return m_record->Mesh();
       }
 
       VOID Register(cMANIFOLD_RECORD *record) {
