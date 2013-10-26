@@ -47,7 +47,7 @@ cVECTOR3 Cross(const cVECTOR3& vec0, const cVECTOR3& vec1)
   return result;
 }
 
-//return a norma;ized vector perpendicular to the given one
+//return a normalized vector perpendicular to the given one
 cVECTOR3 cVECTOR3::PerpVector() const
 {
   cVECTOR3 perpVector;

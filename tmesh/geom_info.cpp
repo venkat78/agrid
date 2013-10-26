@@ -47,7 +47,7 @@ namespace tmesh {
       typename cFACET::vertex_circulator lastVertex = currFacet->VerticesEnd();
       INT index = 0;
       cPOINT2 point[3];
-      //temporaril assume that all the facets are triangular - we deal wtih an STL geometry
+      //temporarily assume that all the facets are triangular - we deal wtih an STL geometry
       //compute the 2d triangle
       for (; currVertex != lastVertex; currVertex++){
     	point[index++] = currVertex->Point().DropCoord(coord);
@@ -132,6 +132,34 @@ namespace tmesh {
 	}
 	return NULL;
   }
+
+  //generates vector with elements facet0_number_of_Vertices, Vertex[0],..., Vertex[n-1],
+  //facet1_number_of_Vertices,...., etc. It's needed for amoeba grid export
+  //for a deleted facet it puts the number of Vertices as 0, and it returns
+  //the total number of facet Vertices, facet1_number_of_Vertices+facet0_number_of_Vertices+...
+  _TMESH_TMPL_TYPE
+      VOID _TMESH_TMPL_DECL::GenerateFacetsCRF(cCRF &crf)
+  {
+	INT totalNumVertices = 0;
+	INT largestFacetIndex = LargestFacetIndex();
+	crf.ElementPushBack(0);
+
+	for (INT f = 0; f < largestFacetIndex; f++){
+	  cFACET *facet = Facet(f);
+	  if (facet != NULL && !facet->IsDeleted()){
+		crf.ElementPushBack(totalNumVertices); //it cannot be ignored without re-indexation
+		typename cFACET::vertex_circulator currVtx = facet->VerticesBegin();
+		typename cFACET::vertex_circulator lastVtx = facet->VerticesEnd();
+
+		for( ; currVtx != lastVtx ; currVtx++) {
+		  crf.ElementPushBack(currVtx->Index());
+		  totalNumVertices++;
+		}
+	  }
+	  crf.ObjectPushBack(totalNumVertices);
+	}
+  }
+
 
  /* _TMESH_TMPL_TYPE
   BOOL _TMESH_TMPL_DECL::IsAlmostClosed() const

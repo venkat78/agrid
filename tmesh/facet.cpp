@@ -22,6 +22,17 @@ INT tFACET<_Mesh_Entities>::NumVertices() const
 }
 
 template <typename _Mesh_Entities>
+VOID tFACET<_Mesh_Entities>::PushVerticesToVector(std::vector<INT> *facetVertexVector) const
+{
+  vertex_circulator currVtx = VerticesBegin();
+  vertex_circulator lastVtx = VerticesEnd();
+
+  for( ; currVtx != lastVtx ; currVtx++) {
+	facetVertexVector->push_back(currVtx->Index());
+  }
+}
+
+template <typename _Mesh_Entities>
 BOOL tFACET<_Mesh_Entities>::ContainsVertex(cVERTEX *vertex) const
 {
   const cHALF_EDGE* heInit = HalfEdge();

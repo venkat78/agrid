@@ -10,4 +10,7 @@
 template class tMODEL<sAMOEBA_MODEL_ATTRIBUTES>;
 
 
-
+BOOL MeshProcessingPriority(sAMOEBA_MESH_ATTRIBUTES *attr1, sAMOEBA_MESH_ATTRIBUTES *attr2)
+{
+	return attr1->m_cindex > attr2->m_cindex;
+}

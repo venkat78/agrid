@@ -154,7 +154,6 @@ namespace io
 		}
 		return ExportToOff<cMESH>(filename, mesh, &facetColors);
 	}
-
 }
 
 #endif /* OFF_HPP_ */

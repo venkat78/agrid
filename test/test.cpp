@@ -1055,10 +1055,13 @@ BOOL read_facets(char* file_path)
 //}
 
 int main(int argc, char **argv)
-{	cAMOEBA_MODEL model;
+{
+	cAMOEBA_MODEL model;
+	printf("AMO FILE %s\n", argv[1]);
 	io::ImportAmoebaModel(argv[1], model);
 	std::string offFileName(argv[1]);
 	offFileName.append(".off");
 	io::ExportModelToOff<cAMOEBA_MODEL>((char *)(offFileName.c_str()), model);
+	printf("Successfully imported %s\n", argv[1]);
 }
 

@@ -125,8 +125,8 @@ BOOL cHOLE_FILLER::FindCycle()
      }
 
    } while (cyclesLeft);
-  return false;
 #endif
+  return false;
 }
 
 VOID cHOLE_FILLER::CollectCycleVertices(iVERTEX terminalVtx,

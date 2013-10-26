@@ -4,6 +4,7 @@
 #include "defs.hpp"
 #include "grid_object_factory.hpp"
 #include "grid_cell.hpp"
+#include <cstdio>
 
 namespace base_grid {
   struct sGRID_STORAGE_POLICY {

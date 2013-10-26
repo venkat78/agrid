@@ -24,6 +24,8 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.192851509" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1432643782" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mesh_utils}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/base-grid}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/grid-gen}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/model}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/spatial_trees}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/agrid-boolean}&quot;"/>
@@ -34,7 +36,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/io}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/geom}&quot;"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.other.other.653903295" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.653903295" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1310298061" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1857390840" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -161,6 +163,15 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="test.cdt.managedbuild.target.gnu.exe.1866938475" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
 	</storageModule>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/test"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/test"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
 		<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
@@ -243,7 +254,7 @@
 				<parser enabled="true"/>
 			</scannerInfoProvider>
 		</profile>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.490473631;cdt.managedbuild.config.gnu.exe.debug.490473631.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1857390840;cdt.managedbuild.tool.gnu.c.compiler.input.1976208548">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.519193962;cdt.managedbuild.config.gnu.exe.release.519193962.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1508913389;cdt.managedbuild.tool.gnu.c.compiler.input.1851019904">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 			<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 				<buildOutputProvider>
@@ -409,7 +420,7 @@
 				</scannerInfoProvider>
 			</profile>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.519193962;cdt.managedbuild.config.gnu.exe.release.519193962.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.1508913389;cdt.managedbuild.tool.gnu.c.compiler.input.1851019904">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.490473631;cdt.managedbuild.config.gnu.exe.debug.490473631.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1857390840;cdt.managedbuild.tool.gnu.c.compiler.input.1976208548">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 			<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
 				<buildOutputProvider>
@@ -576,13 +587,4 @@
 			</profile>
 		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Release">
-			<resource resourceType="PROJECT" workspacePath="/test"/>
-		</configuration>
-		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/test"/>
-		</configuration>
-	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 </cproject>

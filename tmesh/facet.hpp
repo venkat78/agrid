@@ -44,6 +44,7 @@ namespace tmesh {
     }
 
     INT NumVertices() const ;
+    VOID PushVerticesToVector(std::vector<INT> *facetVertexVector) const;
     BOOL ContainsVertex(cVERTEX *vertex) const;
     BOOL Contains(const cPOINT3 &point);
     BOOL IsBorder() const;

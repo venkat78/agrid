@@ -118,6 +118,57 @@ namespace tmesh {
     return true;
   }
 
+  //tessellates a cylinder/cone with a mesh with n strips. The top and bottom are
+  //constructed as polygons with n vertices. Returns index of the first vertex
+
+  _TMESH_TMPL_TYPE
+    iVERTEX _TMESH_TMPL_DECL::AppendTessellatedCylinder(cPOINT3 &c1, cPOINT3 &c2,
+    		REAL r1, REAL r2, INT n)
+  {
+	  cVECTOR3 z_axis = c2 - c1;
+	  cVECTOR3 x_axis = z_axis.PerpVector();
+	  cVECTOR3 y_axis= Cross(z_axis, x_axis);
+	  y_axis = y_axis.Normalize();
+
+	  //create vertices
+	  iVERTEX firstVertexIndex = INVALID_IVERTEX;
+	  REAL angleIncrement = 2.0*M_PI/((REAL)n);
+	  REAL angle = 0.0;
+
+	  for (INT k = 0; k < n; k++){
+		  cVECTOR3 vertexVector = x_axis*cos(angle) + y_axis*sin(angle);
+		  cPOINT3 point1 = c1 + vertexVector*r1;
+		  cPOINT3 point2 = c2 + vertexVector*r2;
+		  iVERTEX ivertex1 = NewVertex(point1);
+		  if (firstVertexIndex == INVALID_IVERTEX)
+			  firstVertexIndex = ivertex1;
+		  iVERTEX ivertex2 = NewVertex(point2);
+		  angle += angleIncrement;
+	  }
+
+	  //create bottom and top polygons
+	  NewFacetStart();
+	  for (INT k=n-1; k>=0; k--){
+		  NewFacetAddVertex(firstVertexIndex+2*k);
+	  }
+	  NewFacetClose();
+
+	  NewFacetStart();
+	  for (INT k=0; k<n; k++){
+		  NewFacetAddVertex(firstVertexIndex+1+2*k);
+	  }
+	  NewFacetClose();
+
+	  for(INT k=1; k < n; k++){
+		  NewQuad(firstVertexIndex+2*k-2, firstVertexIndex+2*k,
+				  firstVertexIndex+2*k+1, firstVertexIndex+2*k-1);
+	  }
+	  NewQuad(firstVertexIndex+2*n-2, firstVertexIndex,
+	  				  firstVertexIndex+1, firstVertexIndex+2*n-1);
+
+	  return firstVertexIndex;
+  }
+
   _TMESH_TMPL_TYPE
   BOOL _TMESH_TMPL_DECL::FlipFacet(iFACET facetIndex)
   {

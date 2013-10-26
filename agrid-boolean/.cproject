@@ -29,6 +29,8 @@
 								<option id="gnu.cpp.compiler.lib.debug.option.debugging.level.1003771521" name="Debug Level" superClass="gnu.cpp.compiler.lib.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.2140180293" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/surface_mesh}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/base-grid}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/grid-gen}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/model}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/spatial_trees}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/agrid-mesh}&quot;"/>
@@ -38,7 +40,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/io}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/utils}&quot;"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.other.other.97454587" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.97454587" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1303081617" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.lib.debug.1922007831" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.lib.debug">

@@ -21,7 +21,11 @@ using namespace mesh_utils;
 #include "io.hpp"
 using namespace io;
 
+#include "grid.hpp"
+using namespace base_grid;
+
 #include "agrid_mesh.hpp"
+
 
 //#undef ASSERT
 
