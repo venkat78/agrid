@@ -34,7 +34,10 @@ namespace grid_gen {
     Split(bigCellClay, childClay);
 
     //Clip all facets.
+    typename _GRID_CELL::cENTRY *currEntry = m_cell->begin().operator*();
+    currEntry->Dump("before_clipping.vtk");
     m_cell->Clip(m_coord, val);
+    currEntry->Dump("after_clipping.vtk");
 
     _GRID_CELL *childCell1 = m_grid->AddCell();
     _GRID_CELL *childCell2 = m_grid->AddCell();
@@ -54,12 +57,17 @@ namespace grid_gen {
     for (; currEntryItr != lastEntryItr; currEntryItr++) {
       DistributeManifold(currEntryItr.operator*(), leftCell, rightCell);
     }
+
+    parentCell->DeleteEntries();
+    parentCell->AddChild(leftCell, 0);
+    parentCell->AddChild(rightCell, 1);
   }
 
   template<typename _GRID_TYPE, typename _GRID_CELL>
   VOID tSUB_DIVIDE<_GRID_TYPE, _GRID_CELL>::DistributeManifold(cGRID_ENTRY *entry, _GRID_CELL *leftCell, _GRID_CELL *rightCell) {
     INT nCells[3] = { 1, 1, 1 };
     nCells[m_coord] = 2;
+//#ifdef LATER
     cSMALL_GRID localGrid(m_box, nCells);
 
     iCELL_INDEX leftCellIndex = localGrid.CellIndex(leftCell->Box().Center());
@@ -86,6 +94,7 @@ namespace grid_gen {
         rightCell->Register(record, *currFacet);
       }
     }
+//#endif //LATER
   }
 
   template<typename _GRID_TYPE, typename _GRID_CELL>

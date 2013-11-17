@@ -38,14 +38,7 @@ namespace grid_gen {
       VOID RegisterOnClayEdges(cCUT_CELL_CLAY &clay, const cBOX3 &clayBox, const cPOINT3 &point, iVERTEX meshVertexIndex);
 
      private:
-      struct sLOCAL_GRID_STORAGE_POLICY {
-          static const INT numObjectsInPage = 2;
-          static const INT logOfObjectsInPage = 1;
-          static const INT numInitialPages = 2;
-      };
-
-      typedef tGRID<_GRID_CELL, sLOCAL_GRID_STORAGE_POLICY> cSMALL_GRID;
-
+      typedef tSMALL_GRID<_GRID_CELL> cSMALL_GRID;
      private:
       _GRID_TYPE *m_grid;
       _GRID_CELL *m_cell;
